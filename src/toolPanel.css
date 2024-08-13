@@ -1,0 +1,27 @@
+.tool-panel {
+    position: sticky;
+    top: 2%;
+    left: 35%;
+    width: 500px;
+    background-color: #fff;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.tool-panel button {
+    padding: 5px 10px;
+
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.tool-panel button:hover {
+    background-color: #0056b3;
+}
