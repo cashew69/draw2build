@@ -13,6 +13,7 @@ function RectTool({
   //const [rectangles, setRectangles] = useState<CustomRect[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const stage = stageRef.current;
+  const scale = stageRef.current?.scaleX();
   const [newRect, setNewRect] = useState({
     x: 0,
     y: 0,
@@ -25,8 +26,8 @@ function RectTool({
     const pos = stageRef.current?.getPointerPosition();
     if (pos) {
       setNewRect({
-        x: pos.x - stage?.x(),
-        y: pos.y - stage?.y(),
+        x: (pos.x - stage?.x()) / scale,
+        y: (pos.y - stage?.y()) / scale,
         width: 0,
         height: 0,
         draggable: true,
@@ -41,8 +42,8 @@ function RectTool({
     if (pos) {
       setNewRect((prevRect) => ({
         ...prevRect,
-        width: pos.x - stage?.x() - prevRect.x,
-        height: pos.y - stage?.y() - prevRect.y,
+        width: (pos.x - stage?.x()) / scale - prevRect.x,
+        height: (pos.y - stage?.y()) / scale - prevRect.y,
       }));
     }
   };

@@ -58,6 +58,7 @@ function Canvas({
   updateShapeElement: (id: string, element: string) => void;
   deleteShape: (id: string) => void;
 }) {
+  // Infinte Canvas <----
   const WIDTH = 100;
   const HEIGHT = 100;
 
@@ -66,6 +67,7 @@ function Canvas({
     ["white", "white"],
   ];
   const [stagePos, setStagePos] = React.useState({ x: 0, y: 0 });
+  const [stageScale, setStageScale] = React.useState(1);
   const [stageDrag, setStageDrag] = React.useState(false);
   const [prevTool, setprevTool] = React.useState("");
   const startX = Math.floor((-stagePos.x - window.innerWidth) / WIDTH) * WIDTH;
@@ -101,6 +103,29 @@ function Canvas({
     }
   }
 
+  // ---->
+  // zoom in and out
+  const handleWheel = (e) => {
+    e.evt.preventDefault();
+
+    const scaleBy = 1.1;
+    const stage = e.target.getStage();
+    const oldScale = stage.scaleX();
+    const mousePointTo = {
+      x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
+      y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale,
+    };
+
+    const newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+
+    setStageScale(newScale);
+    const stageX =
+      -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale;
+    const stageY =
+      -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale;
+    setStagePos({ x: stageX, y: stageY });
+  };
+
   // References for the stage and transformer (used for manipulating shapes)
   const stageRef = React.useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -118,7 +143,6 @@ function Canvas({
       setStageDrag(true); // Enable dragging when Space key is pressed}
       setprevTool(tool);
       tool = "line";
-      console.log(tool);
     }
   };
 
@@ -126,9 +150,7 @@ function Canvas({
     if (e.key === " ") {
       setStageDrag(false); // disable dragging when Space key is not pressed}
       tool = prevTool;
-      console.log(prevTool);
       setprevTool("");
-      console.log(tool);
     }
   };
   const handleElementSet = () => {
@@ -148,6 +170,7 @@ function Canvas({
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
+    //window.addEventListener("wheel", handlew)
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
@@ -176,6 +199,9 @@ function Canvas({
   return (
     <div>
       <Stage
+        onWheel={handleWheel}
+        scaleX={stageScale}
+        scaleY={stageScale}
         x={stagePos.x}
         y={stagePos.y}
         width={window.innerWidth}

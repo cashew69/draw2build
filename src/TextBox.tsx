@@ -11,6 +11,7 @@ export function TextBox({
   addText: (text: { x: number; y: number; text: string }) => void;
 }) {
   const stage = stageRef.current;
+  const scale = stageRef.current?.scaleX();
   const [textValue, setTextValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setisEditing] = useState(0);
@@ -26,7 +27,10 @@ export function TextBox({
     const pos = stageRef.current?.getPointerPosition();
 
     if (pos) {
-      setPos({ x: pos.x - stage?.x(), y: pos.y - stage?.y() });
+      setPos({
+        x: (pos.x - stage?.x()) / scale,
+        y: (pos.y - stage?.y()) / scale,
+      });
       setisEditing(1);
     }
   };

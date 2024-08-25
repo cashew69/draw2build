@@ -15,16 +15,17 @@ function ArrowTool({
   const [isDrawing, setIsDrawing] = useState(false);
   const [newArrow, setNewArrow] = useState<CustomArrow>({ points: [] });
   const stage = stageRef.current;
+  const scale = stageRef.current?.scaleX();
 
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const pos = stageRef.current?.getPointerPosition();
     if (pos) {
       setNewArrow({
         points: [
-          pos.x - stage?.x(),
-          pos.y - stage?.y(),
-          pos.x - stage?.x(),
-          pos.y - stage?.y(),
+          (pos.x - stage?.x()) / scale,
+          (pos.y - stage?.y()) / scale,
+          (pos.x - stage?.x()) / scale,
+          (pos.y - stage?.y()) / scale,
         ],
       });
       setIsDrawing(true);
@@ -39,8 +40,8 @@ function ArrowTool({
         points: [
           prevArrow.points[0],
           prevArrow.points[1],
-          pos.x - stage?.x(),
-          pos.y - stage?.y(),
+          (pos.x - stage?.x()) / scale,
+          (pos.y - stage?.y()) / scale,
         ],
       }));
     }

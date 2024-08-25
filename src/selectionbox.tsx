@@ -11,6 +11,7 @@ interface SelectionBoxProps {
 const SelectionBox: React.FC<SelectionBoxProps> = ({ stageRef }) => {
   const isSelecting = useRef(false);
   const stage = stageRef.current;
+  const scale = stageRef.current?.scaleX();
   const [selectionBox, setSelectionBox] = useState({
     x: 0,
     y: 0,
@@ -22,8 +23,8 @@ const SelectionBox: React.FC<SelectionBoxProps> = ({ stageRef }) => {
     const pos = stageRef.current?.getPointerPosition();
     if (pos) {
       setSelectionBox({
-        x: pos.x - stage?.x(),
-        y: pos.y - stage?.y(),
+        x: (pos.x - stage?.x()) / scale,
+        y: (pos.y - stage?.y()) / scale,
         width: 0,
         height: 0,
       });
@@ -37,8 +38,8 @@ const SelectionBox: React.FC<SelectionBoxProps> = ({ stageRef }) => {
     if (pos) {
       setSelectionBox((prevBox) => ({
         ...prevBox,
-        width: pos.x - stage?.x() - prevBox.x,
-        height: pos.y - stage?.y() - prevBox.y,
+        width: (pos.x - stage?.x()) / scale - prevBox.x,
+        height: (pos.y - stage?.y()) / scale - prevBox.y,
       }));
     }
   };
@@ -61,7 +62,7 @@ const SelectionBox: React.FC<SelectionBoxProps> = ({ stageRef }) => {
         stage.off("mouseup", handleMouseUp);
       };
     }
-  }, []);
+  }, [selectionBox, scale]);
 
   return (
     <>
