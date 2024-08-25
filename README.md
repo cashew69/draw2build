@@ -1,8 +1,6 @@
 # draw2build
 
-## Issues:
+# Video Status as of 25/08/24 4:30 PM
+[![YouTube](http://i.ytimg.com/vi/gM1jqVpg2Vs/hqdefault.jpg)](https://youtu.be/gM1jqVpg2Vs)
 
-1. New Shape cant be created on negative plain. -> Fixed 
-
-# Video Status as of 25/08/24 2:54PM
-[![YouTube](http://i.ytimg.com/vi/shN9ZwAS4GQ/hqdefault.jpg)](https://www.youtube.com/watch?v=shN9ZwAS4GQ)
+![Past Videos](https://youtube.com/playlist?list=PLXZ22ptO_ES-vjmLI3KGwXbggP9KPmne0&si=274OgEG_b6dRSwbG)
