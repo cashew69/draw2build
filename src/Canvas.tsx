@@ -58,6 +58,48 @@ function Canvas({
   updateShapeElement: (id: string, element: string) => void;
   deleteShape: (id: string) => void;
 }) {
+  const WIDTH = 100;
+  const HEIGHT = 100;
+
+  const grid = [
+    ["red", "yellow"],
+    ["green", "blue"],
+  ];
+  const [stagePos, setStagePos] = React.useState({ x: 0, y: 0 });
+  const [stageDrag, setStageDrag] = React.useState(false);
+  const startX = Math.floor((-stagePos.x - window.innerWidth) / WIDTH) * WIDTH;
+  const endX =
+    Math.floor((-stagePos.x + window.innerWidth * 2) / WIDTH) * WIDTH;
+
+  const startY =
+    Math.floor((-stagePos.y - window.innerHeight) / HEIGHT) * HEIGHT;
+  const endY =
+    Math.floor((-stagePos.y + window.innerHeight * 2) / HEIGHT) * HEIGHT;
+
+  const gridComponents = [];
+  var i: number = 0;
+  for (var x: number = startX; x < endX; x += WIDTH) {
+    for (var y: number = startY; y < endY; y += HEIGHT) {
+      if (i === 4) {
+        i = 0;
+      }
+
+      const indexX = Math.abs(x / WIDTH) % grid.length;
+      const indexY = Math.abs(y / HEIGHT) % grid[0].length;
+
+      gridComponents.push(
+        <Rect
+          x={x}
+          y={y}
+          width={WIDTH}
+          height={HEIGHT}
+          fill={grid[indexX][indexY]}
+          stroke="black"
+        />,
+      );
+    }
+  }
+
   // References for the stage and transformer (used for manipulating shapes)
   const stageRef = React.useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -65,6 +107,7 @@ function Canvas({
   const [isEditingElement, setIsEditingElement] = useState(false);
 
   console.log(texts);
+  console.log(stageDrag);
   // Function to handle key down events, specifically for deleting shapes
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Delete" && selectedShape) {
@@ -72,6 +115,14 @@ function Canvas({
       setSelectedShape(null); // Deselect the shape after deletion
     } else if (e.key === "/" && selectedShape) {
       setIsEditingElement(true); // Enable editing when slash key is pressed
+    } else if (e.key === " ") {
+      setStageDrag(true); // Enable editing when slash key is pressed}
+    }
+  };
+
+  const handleKeyUp = (e: KeyboardEvent) => {
+    if (e.key === " ") {
+      setStageDrag(false); // Enable editing when slash key is pressed}
     }
   };
   const handleElementSet = () => {
@@ -90,10 +141,12 @@ function Canvas({
   // Add event listener for keydown on mount and remove on unmount
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [selectedShape]);
+  }, [selectedShape, stageDrag]);
 
   // Update transformer when selected shape changes
   useEffect(() => {
@@ -117,8 +170,14 @@ function Canvas({
   return (
     <div>
       <Stage
+        x={stagePos.x}
+        y={stagePos.y}
         width={window.innerWidth}
         height={window.innerHeight}
+        draggable={stageDrag}
+        onDragEnd={(e) => {
+          setStagePos(e.currentTarget.position());
+        }}
         ref={stageRef}
         onMouseDown={(e) => {
           if (e.target === stageRef.current) {
@@ -127,6 +186,8 @@ function Canvas({
         }}
       >
         <Layer>
+          {gridComponents}
+
           {tool === "selection" && <SelectionBox stageRef={stageRef} />}
           {tool === "rect" && (
             <RectTool
@@ -160,12 +221,10 @@ function Canvas({
               stageRef={stageRef}
               addText={(text) => {
                 const newText = { ...text, uid: ShortId(), element: "" }; // Assign UUID
-                console.log(newText);
                 addText(newText);
               }}
             />
           )}
-
           {/* Rendering all rectangles */}
           {rectangles.map((rect, i) => (
             <Rect
@@ -221,6 +280,8 @@ function Canvas({
               x={text.x}
               y={text.y}
               text={text.text}
+              width={text.width}
+              height={text.height}
               fontSize={15}
               id={`text${i}`}
               draggable

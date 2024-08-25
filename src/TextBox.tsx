@@ -74,6 +74,8 @@ export function TextBox({
           x={Position.x}
           y={Position.y}
           text={textValue}
+          width={100}
+          height={100}
           fontSize={15}
           draggable
         />

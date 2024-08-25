@@ -23,6 +23,12 @@ export interface CustomArrow {
 export interface CustomText {
   x: number;
   y: number;
+  textX?: number;
+  textY?: number;
+  width?: number;
+  height?: number;
+  fontSize?: number;
+  draggable?: boolean;
   text: string;
   element?: string | null;
   uid?: string;

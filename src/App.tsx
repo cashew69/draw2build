@@ -57,6 +57,9 @@ export function App() {
     } else if (id.startsWith("text")) {
       const index = parseInt(id.replace("text", ""));
       setTexts(texts.filter((_, i) => i !== index));
+    } else if (id.startsWith("none")) {
+      const index = parseInt(id.replace("none", ""));
+      setTexts(texts.filter((_, i) => i !== index));
     }
   };
 
