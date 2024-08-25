@@ -11,6 +11,7 @@ function LineTool({
   stageRef: React.RefObject<Konva.Stage>;
   addLine: (line: CustomLine) => void;
 }) {
+  const stage = stageRef.current;
   const [lines, setLines] = useState<CustomLine[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [newLine, setNewLine] = useState<CustomLine>({
@@ -21,7 +22,10 @@ function LineTool({
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const pos = stageRef.current?.getPointerPosition();
     if (pos) {
-      setNewLine({ points: [pos.x, pos.y], draggable: true });
+      setNewLine({
+        points: [pos.x - stage?.x(), pos.y - stage?.y()],
+        draggable: true,
+      });
       setIsDrawing(true);
     }
   };
@@ -31,7 +35,7 @@ function LineTool({
     const pos = stageRef.current?.getPointerPosition();
     if (pos) {
       setNewLine((prevLine) => ({
-        points: [...prevLine.points, pos.x, pos.y],
+        points: [...prevLine.points, pos.x - stage?.x(), pos.y - stage?.y()],
         draggable: true,
       }));
     }

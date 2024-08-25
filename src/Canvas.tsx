@@ -67,6 +67,7 @@ function Canvas({
   ];
   const [stagePos, setStagePos] = React.useState({ x: 0, y: 0 });
   const [stageDrag, setStageDrag] = React.useState(false);
+  const [prevTool, setprevTool] = React.useState("");
   const startX = Math.floor((-stagePos.x - window.innerWidth) / WIDTH) * WIDTH;
   const endX =
     Math.floor((-stagePos.x + window.innerWidth * 2) / WIDTH) * WIDTH;
@@ -106,8 +107,6 @@ function Canvas({
   const [selectedShape, setSelectedShape] = useState<string | null>(null); // State to track the selected shape
   const [isEditingElement, setIsEditingElement] = useState(false);
 
-  console.log(texts);
-  console.log(stageDrag);
   // Function to handle key down events, specifically for deleting shapes
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Delete" && selectedShape) {
@@ -116,13 +115,20 @@ function Canvas({
     } else if (e.key === "/" && selectedShape) {
       setIsEditingElement(true); // Enable editing when slash key is pressed
     } else if (e.key === " ") {
-      setStageDrag(true); // Enable editing when slash key is pressed}
+      setStageDrag(true); // Enable dragging when Space key is pressed}
+      setprevTool(tool);
+      tool = "line";
+      console.log(tool);
     }
   };
 
   const handleKeyUp = (e: KeyboardEvent) => {
     if (e.key === " ") {
-      setStageDrag(false); // Enable editing when slash key is pressed}
+      setStageDrag(false); // disable dragging when Space key is not pressed}
+      tool = prevTool;
+      console.log(prevTool);
+      setprevTool("");
+      console.log(tool);
     }
   };
   const handleElementSet = () => {

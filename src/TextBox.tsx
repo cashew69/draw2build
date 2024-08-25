@@ -10,6 +10,7 @@ export function TextBox({
   stageRef: React.RefObject<Konva.Stage>;
   addText: (text: { x: number; y: number; text: string }) => void;
 }) {
+  const stage = stageRef.current;
   const [textValue, setTextValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setisEditing] = useState(0);
@@ -25,7 +26,7 @@ export function TextBox({
     const pos = stageRef.current?.getPointerPosition();
 
     if (pos) {
-      setPos({ x: pos.x, y: pos.y });
+      setPos({ x: pos.x - stage?.x(), y: pos.y - stage?.y() });
       setisEditing(1);
     }
   };

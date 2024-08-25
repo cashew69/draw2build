@@ -12,6 +12,7 @@ function RectTool({
 }) {
   //const [rectangles, setRectangles] = useState<CustomRect[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
+  const stage = stageRef.current;
   const [newRect, setNewRect] = useState({
     x: 0,
     y: 0,
@@ -23,7 +24,13 @@ function RectTool({
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const pos = stageRef.current?.getPointerPosition();
     if (pos) {
-      setNewRect({ x: pos.x, y: pos.y, width: 0, height: 0, draggable: true });
+      setNewRect({
+        x: pos.x - stage?.x(),
+        y: pos.y - stage?.y(),
+        width: 0,
+        height: 0,
+        draggable: true,
+      });
       setIsDrawing(true);
     }
   };
@@ -34,8 +41,8 @@ function RectTool({
     if (pos) {
       setNewRect((prevRect) => ({
         ...prevRect,
-        width: pos.x - prevRect.x,
-        height: pos.y - prevRect.y,
+        width: pos.x - stage?.x() - prevRect.x,
+        height: pos.y - stage?.y() - prevRect.y,
       }));
     }
   };
