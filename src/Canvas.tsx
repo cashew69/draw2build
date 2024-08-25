@@ -62,8 +62,8 @@ function Canvas({
   const HEIGHT = 100;
 
   const grid = [
-    ["red", "yellow"],
-    ["green", "blue"],
+    ["white", "white"],
+    ["white", "white"],
   ];
   const [stagePos, setStagePos] = React.useState({ x: 0, y: 0 });
   const [stageDrag, setStageDrag] = React.useState(false);
