@@ -21,7 +21,9 @@ import { TextBox } from "./TextBox";
 import CodeBlockTool from "./codeBlockTool";
 import { Html } from "react-konva-utils";
 import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
+import { okaidia } from '@uiw/codemirror-theme-okaidia';
+import { loadLanguage } from '@uiw/codemirror-extensions-langs';
+
 
 function ShortId(): string {
   const timestamp = Date.now().toString(36).substr(3, 3); // Convert timestamp to base-36
@@ -47,6 +49,7 @@ function Canvas({
   updateLinePosition, // Function to update position of a line
   updateArrowPosition, // Function to update position of an arrow
   updateCodeBlockPosition, // Function to update position of a code block
+  updateCodeContent,
   updateShapeElement,
   deleteShape, // Function to delete a selected shape
 }: {
@@ -66,6 +69,7 @@ function Canvas({
   updateLinePosition: (index: number, x: number, y: number) => void;
   updateArrowPosition: (index: number, x: number, y: number) => void;
   updateCodeBlockPosition: (index: number, x: number, y: number) => void;
+  updateCodeContent: (index: number, content: string) => void;
   updateShapeElement: (id: string, element: string) => void;
   deleteShape: (id: string) => void;
 }) {
@@ -127,7 +131,7 @@ function Canvas({
       y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale,
     };
 
-    const newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
     setStageScale(newScale);
     const stageX =
@@ -206,6 +210,17 @@ function Canvas({
   // Function to handle selecting a shape
   const handleSelect = (e: Konva.KonvaEventObject<MouseEvent>, id: string) => {
     setSelectedShape(id); // Set the selected shape's ID
+  };
+
+  // Function to get theme object from string
+  const getThemeObject = (themeName: string) => {
+    switch (themeName) {
+      case 'okaidia':
+        return okaidia;
+      // Add more cases for other themes as needed
+      default:
+        return okaidia;
+    }
   };
 
   return (
@@ -370,8 +385,11 @@ function Canvas({
                   <CodeMirror
                     value={codeBlock.content}
                     height={`${codeBlock.height}px`}
-                    extensions={[javascript({ jsx: true })]}
-                    editable={true}
+                    theme={getThemeObject(codeBlock.theme)}
+                    extensions={[loadLanguage(codeBlock.language) || []]}
+                    onChange={(value) => {
+                      updateCodeContent(i, value);
+                    }}
                   />
                 </div>
               </Html>

@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Rect, Text, Group } from 'react-konva';
+import React, { useState, useEffect } from "react";
+import { Rect, Group } from 'react-konva';
 import { CustomCodeBlock } from './types';
 import Konva from 'konva';
 import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
+import { loadLanguage } from '@uiw/codemirror-extensions-langs';
+import { okaidia } from '@uiw/codemirror-theme-okaidia';
 import { Html } from 'react-konva-utils';
+
 function CodeBlockTool({ stageRef, addCodeBlock }: {stageRef: React.RefObject<Konva.Stage>; addCodeBlock: (codeBlock: CustomCodeBlock) => void;}) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isPlacing, setIsPlacing] = useState(false);
@@ -32,17 +34,22 @@ function CodeBlockTool({ stageRef, addCodeBlock }: {stageRef: React.RefObject<Ko
 
   const handleCodeChange = (value: string) => {
     setCodeContent(value);
+    console.log("Code Changing");
   };
 
   const handleCodeBlockPlace = () => {
-    const newCodeBlock: CustomCodeBlock = {
+    const newCodeBlockProps: CustomCodeBlock = {
+      uid: '', // This will be set in Canvas component
       x: position.x,
       y: position.y,
       width: 300,
       height: 150,
       content: codeContent,
+      language: 'python',
+      theme: 'okaidia',
+      element: '',
     };
-    addCodeBlock(newCodeBlock);
+    addCodeBlock(newCodeBlockProps);
     setIsPlacing(false);
     setCodeContent("// Your code here");
   };
@@ -75,7 +82,8 @@ function CodeBlockTool({ stageRef, addCodeBlock }: {stageRef: React.RefObject<Ko
               <CodeMirror
                 value={codeContent}
                 height="150px"
-                extensions={[javascript({ jsx: true })]}
+                theme={okaidia}
+                extensions={[loadLanguage('python') || []]}
                 onChange={handleCodeChange}
               />
             </div>

@@ -1,4 +1,5 @@
-// types.ts
+import type { Extension } from "@uiw/react-codemirror";
+
 export interface CustomRect {
   x: number;
   y: number;
@@ -35,12 +36,15 @@ export interface CustomText {
 }
 
 export interface CustomCodeBlock {
-  x: number; 
-  y: number; 
-  width: number; 
-  height: number; 
+  uid: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
   content: string;
-  uid?: string;
+  language: string;
+  theme: string;
+  element: string;
 }
 
 export interface CustomTemplate {

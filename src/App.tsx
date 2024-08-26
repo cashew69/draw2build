@@ -54,6 +54,13 @@ export function App() {
     setCodeBlocks(updatedCodeBlocks);
   };
 
+  const updateCodeContent = (index: number, content: string) => {
+    const updatedCodeBlocks = codeBlocks.map((codeBlock, i) =>
+      i === index ? { ...codeBlock, content } : codeBlock,
+    );
+    setCodeBlocks(updatedCodeBlocks);
+  };
+
   const deleteShape = (id: string) => {
     if (id.startsWith("rect")) {
       const index = parseInt(id.replace("rect", ""));
@@ -164,6 +171,7 @@ export function App() {
         updateLinePosition={updateLinePosition}
         updateArrowPosition={updateArrowPosition}
         updateCodeBlockPosition={updateCodeBlockPosition}
+        updateCodeContent={updateCodeContent}
         deleteShape={deleteShape}
         updateShapeElement={updateShapeElement}
       />
