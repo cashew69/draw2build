@@ -11,6 +11,7 @@ function ToolPanel({ setTool, saveShapes, loadShapes }: ToolPanelProps) {
   return (
     <div className="tool-panel">
       <button onClick={() => setTool("none")}>None</button>
+      <button onClick={() => setTool("CodeBlock")}>CodeBlock</button>
       <button onClick={() => setTool("selection")}>Selection</button>
       <button onClick={() => setTool("rect")}>Rectangle</button>
       <button onClick={() => setTool("line")}>Line</button>

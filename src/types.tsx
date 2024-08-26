@@ -33,3 +33,22 @@ export interface CustomText {
   element?: string | null;
   uid?: string;
 }
+
+export interface CustomCodeBlock {
+  x: number; 
+  y: number; 
+  width: number; 
+  height: number; 
+  content: string;
+  uid?: string;
+}
+
+export interface CustomTemplate {
+  x: number; 
+  y: number; 
+  width: number; 
+  height: number; 
+  content: string;
+  element?: string | null;
+  uid?: string;
+}

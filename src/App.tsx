@@ -1,7 +1,8 @@
 import Canvas from "./Canvas.tsx";
 import ToolPanel from "./toolPanel.tsx";
 import { useState } from "react";
-import { CustomRect, CustomLine, CustomArrow, CustomText } from "./types";
+import { CustomRect, CustomLine, CustomArrow, CustomText, CustomCodeBlock } from "./types";
+import CodeBlockTool from "./codeBlockTool.tsx";
 
 export function App() {
   const [tool, setTool] = useState("selection");
@@ -9,12 +10,14 @@ export function App() {
   const [lines, setLines] = useState<CustomLine[]>([]);
   const [arrows, setArrows] = useState<CustomArrow[]>([]);
   const [texts, setTexts] = useState<CustomText[]>([]);
+  const [codeBlocks, setCodeBlocks] = useState<CustomCodeBlock[]>([]);
 
   const addRectangle = (rect: CustomRect) =>
     setRectangles([...rectangles, rect]);
   const addLine = (line: CustomLine) => setLines([...lines, line]);
   const addArrow = (arrow: CustomArrow) => setArrows([...arrows, arrow]);
   const addText = (text: CustomText) => setTexts([...texts, text]);
+  const addCodeBlock = (codeBlock: CustomCodeBlock) => setCodeBlocks([...codeBlocks, codeBlock]);
 
   const updateTextPosition = (index: number, x: number, y: number) => {
     const updatedTexts = texts.map((text, i) =>
@@ -44,6 +47,13 @@ export function App() {
     setArrows(updatedArrows);
   };
 
+  const updateCodeBlockPosition = (index: number, x: number, y: number) => {
+    const updatedCodeBlocks = codeBlocks.map((codeBlock, i) =>
+      i === index ? { ...codeBlock, x, y } : codeBlock,
+    );
+    setCodeBlocks(updatedCodeBlocks);
+  };
+
   const deleteShape = (id: string) => {
     if (id.startsWith("rect")) {
       const index = parseInt(id.replace("rect", ""));
@@ -60,6 +70,9 @@ export function App() {
     } else if (id.startsWith("none")) {
       const index = parseInt(id.replace("none", ""));
       setTexts(texts.filter((_, i) => i !== index));
+    } else if (id.startsWith("codeBlock")) {
+      const index = parseInt(id.replace("codeBlock", ""));
+      setCodeBlocks(codeBlocks.filter((_, i) => i !== index));
     }
   };
 
@@ -70,6 +83,7 @@ export function App() {
       lines,
       arrows,
       texts,
+      codeBlocks,
     };
     const blob = new Blob([JSON.stringify(shapes)], {
       type: "application/json",
@@ -96,6 +110,7 @@ export function App() {
         setLines(shapesData.lines || []);
         setArrows(shapesData.arrows || []);
         setTexts(shapesData.texts || []);
+        setCodeBlocks(shapesData.codeBlocks || []);
       }
     };
     input.click();
@@ -120,6 +135,9 @@ export function App() {
     setTexts((prevTexts) =>
       prevTexts.map((text) => (text.uid === uid ? { ...text, element } : text)),
     );
+    setCodeBlocks((prevCodeBlocks) =>
+      prevCodeBlocks.map((codeBlock) => (codeBlock.uid === uid ? { ...codeBlock, element } : codeBlock)),
+    );
   };
 
   return (
@@ -129,70 +147,26 @@ export function App() {
         saveShapes={saveShapes}
         loadShapes={loadShapes}
       />
-
       <Canvas
         tool={tool}
         rectangles={rectangles}
         lines={lines}
         arrows={arrows}
         texts={texts}
+        codeBlocks={codeBlocks}
         addRectangle={addRectangle}
         addLine={addLine}
         addArrow={addArrow}
         addText={addText}
+        addCodeBlock={addCodeBlock}
         updateTextPosition={updateTextPosition}
         updateRectPosition={updateRectPosition}
         updateLinePosition={updateLinePosition}
         updateArrowPosition={updateArrowPosition}
+        updateCodeBlockPosition={updateCodeBlockPosition}
         deleteShape={deleteShape}
         updateShapeElement={updateShapeElement}
       />
     </div>
   );
 }
-/*
-Overview
-
-The App.tsx file contains the main logic for the application. It manages different drawing tools and elements on a canvas, allowing users to draw rectangles, lines, arrows, and texts. It includes state management for these elements and functions to update their positions.
-Components
-
-    Canvas Component:
-        Responsible for rendering the drawing canvas where users can interact with different shapes and texts.
-        Receives the current tool and lists of shapes and texts as props.
-        Functions to add and update elements are also passed as props.
-
-    ToolPanel Component:
-        Allows users to select different drawing tools (e.g., selection tool).
-        Updates the tool state in the App component.
-
-State Management
-
-    tool: Keeps track of the currently selected tool. This can be "selection" or other tool names defined in the ToolPanel component.
-    rectangles: Array of CustomRect objects representing all rectangles drawn on the canvas.
-    lines: Array of CustomLine objects representing all lines drawn on the canvas.
-    arrows: Array of CustomArrow objects representing all arrows drawn on the canvas.
-    texts: Array of CustomText objects representing all text elements on the canvas.
-
-Functions
-
-    Adding Elements:
-        addRectangle(rect: CustomRect): Adds a new rectangle to the rectangles array.
-        addLine(line: CustomLine): Adds a new line to the lines array.
-        addArrow(arrow: CustomArrow): Adds a new arrow to the arrows array.
-        addText(text: CustomText): Adds a new text element to the texts array.
-
-    Updating Positions:
-        updateTextPosition(index: number, x: number, y: number): Updates the position of the text at the specified index.
-        updateRectPosition(index: number, x: number, y: number): Updates the position of the rectangle at the specified index.
-        updateLinePosition(index: number, x: number, y: number): Updates the position of the line at the specified index.
-        updateArrowPosition(index: number, x: number, y: number): Updates the position of the arrow at the specified index.
-
-Rendering
-
-    The App component renders a div containing the ToolPanel and Canvas components.
-    The ToolPanel is used to select the drawing tool.
-    The Canvas receives all current drawing elements and functions to modify them as props.
-
-This setup ensures that the application maintains a clean separation between the UI for selecting tools and the drawing canvas where users interact with shapes and text.
-
-*/
