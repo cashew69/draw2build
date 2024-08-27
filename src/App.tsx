@@ -1,8 +1,7 @@
 import Canvas from "./Canvas.tsx";
 import ToolPanel from "./toolPanel.tsx";
 import { useState } from "react";
-import { CustomRect, CustomLine, CustomArrow, CustomText, CustomCodeBlock } from "./types";
-import CodeBlockTool from "./codeBlockTool.tsx";
+import { CustomRect, CustomLine, CustomArrow, CustomText, CustomCodeBlock,} from "./types";
 
 export function App() {
   const [tool, setTool] = useState("selection");
@@ -18,6 +17,7 @@ export function App() {
   const addArrow = (arrow: CustomArrow) => setArrows([...arrows, arrow]);
   const addText = (text: CustomText) => setTexts([...texts, text]);
   const addCodeBlock = (codeBlock: CustomCodeBlock) => setCodeBlocks([...codeBlocks, codeBlock]);
+
 
   const updateTextPosition = (index: number, x: number, y: number) => {
     const updatedTexts = texts.map((text, i) =>
@@ -61,6 +61,8 @@ export function App() {
     setCodeBlocks(updatedCodeBlocks);
   };
 
+
+
   const deleteShape = (id: string) => {
     if (id.startsWith("rect")) {
       const index = parseInt(id.replace("rect", ""));
@@ -80,7 +82,7 @@ export function App() {
     } else if (id.startsWith("codeBlock")) {
       const index = parseInt(id.replace("codeBlock", ""));
       setCodeBlocks(codeBlocks.filter((_, i) => i !== index));
-    }
+    } 
   };
 
   // Save shapes to a JSON file
@@ -90,7 +92,7 @@ export function App() {
       lines,
       arrows,
       texts,
-      codeBlocks,
+      codeBlocks,// Add connections to the saved data
     };
     const blob = new Blob([JSON.stringify(shapes)], {
       type: "application/json",
@@ -174,6 +176,13 @@ export function App() {
         updateCodeContent={updateCodeContent}
         deleteShape={deleteShape}
         updateShapeElement={updateShapeElement}
+        updateCodeBlockDimensions={(index, width, height) => {
+          // Implement the logic to update dimensions here
+          // For example:
+          setCodeBlocks(prevCodeBlocks => prevCodeBlocks.map((block, i) => 
+            i === index ? { ...block, width, height } : block
+          ));
+        }}
       />
     </div>
   );

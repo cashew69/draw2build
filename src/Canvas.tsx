@@ -16,13 +16,14 @@ import RectTool from "./rectTool"; // For drawing rectangles
 import LineTool from "./lineTool"; // For drawing lines
 import ArrowTool from "./arrowTool"; // For drawing arrows
 import { SetElement, elementtext } from "./setElement"; // For adding text
-import { CustomRect, CustomLine, CustomArrow, CustomText, CustomCodeBlock } from "./types"; // Types for shapes
+import { CustomRect, CustomLine, CustomArrow, CustomText, CustomCodeBlock, } from "./types"; // Types for shapes
 import { TextBox } from "./TextBox";
 import CodeBlockTool from "./codeBlockTool";
 import { Html } from "react-konva-utils";
 import CodeMirror from '@uiw/react-codemirror';
 import { okaidia } from '@uiw/codemirror-theme-okaidia';
 import { loadLanguage } from '@uiw/codemirror-extensions-langs';
+import { TransformerConfig } from 'konva/lib/shapes/Transformer';
 
 
 function ShortId(): string {
@@ -52,6 +53,7 @@ function Canvas({
   updateCodeContent,
   updateShapeElement,
   deleteShape, // Function to delete a selected shape
+  updateCodeBlockDimensions, // Function to update dimensions of a code block
 }: {
   tool: string;
   rectangles: CustomRect[];
@@ -72,6 +74,7 @@ function Canvas({
   updateCodeContent: (index: number, content: string) => void;
   updateShapeElement: (id: string, element: string) => void;
   deleteShape: (id: string) => void;
+  updateCodeBlockDimensions: (index: number, width: number, height: number) => void;
 }) {
   // Infinte Canvas <----
   const WIDTH = 100;
@@ -147,6 +150,9 @@ function Canvas({
   const [selectedShape, setSelectedShape] = useState<string | null>(null); // State to track the selected shape
   const [isEditingElement, setIsEditingElement] = useState(false);
 
+  const [selectedCodeBlock, setSelectedCodeBlock] = useState<string | null>(null);
+  const codeBlockTransformerRef = useRef<Konva.Transformer>(null);
+
   // Function to handle key down events, specifically for deleting shapes
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Delete" && selectedShape) {
@@ -161,7 +167,7 @@ function Canvas({
     }
   };
 
-  console.log(codeBlocks);
+  //console.log(codeBlocks);
   const handleKeyUp = (e: KeyboardEvent) => {
     if (e.key === " ") {
       setStageDrag(false); // disable dragging when Space key is not pressed}
@@ -207,9 +213,82 @@ function Canvas({
     }
   }, [selectedShape]);
 
+  useEffect(() => {
+    if (codeBlockTransformerRef.current) {
+      codeBlockTransformerRef.current.nodes([]);
+      if (selectedCodeBlock) {
+        const selectedNode = stageRef.current?.findOne(`#${selectedCodeBlock}`);
+        if (selectedNode) {
+          codeBlockTransformerRef.current.nodes([selectedNode]);
+          codeBlockTransformerRef.current.getLayer()?.batchDraw();
+        }
+      }
+    }
+  }, [selectedCodeBlock]);
+
   // Function to handle selecting a shape
   const handleSelect = (e: Konva.KonvaEventObject<MouseEvent>, id: string) => {
     setSelectedShape(id); // Set the selected shape's ID
+    
+  };
+
+  const handleCodeBlockSelect = (e: Konva.KonvaEventObject<MouseEvent>, id: string) => {
+    setSelectedCodeBlock(id);
+    setSelectedShape(null); // Deselect other shapes
+    console.log(selectedCodeBlock);
+  };
+
+  const handleCodeBlockTransform = (index: number, e: Konva.KonvaEventObject<Event>) => {
+    const node = e.target as Konva.Group;
+    console.log(node.attrs)
+    const scaleX = node.scaleX();
+    const scaleY = node.scaleY();
+
+    // Update width and height, reset scale
+    const newWidth = Math.max(Math.round(node.width() * scaleX), 100);
+    const newHeight = Math.max(Math.round(node.height() * scaleY), 50);
+
+    // Directly update the node
+    node.width(newWidth);
+    node.height(newHeight);
+    
+    // Update the codeBlocks array with new dimensions
+    codeBlocks[index] = {
+      ...codeBlocks[index],
+      width: newWidth,
+      height: newHeight
+    };
+    updateCodeBlockPosition(index, node.x(), node.y());
+    updateCodeBlockDimensions(index, newWidth, newHeight);
+    node.scaleX(1);
+    node.scaleY(1);
+
+    // Update the rectangle and HTML content inside the group
+    const rect = node.findOne('Rect') as Konva.Rect;
+    const htmlLayer = node.findOne('HTMLLayer') as any; // Konva doesn't have a specific type for HTML layers
+
+    if (rect) {
+      rect.width(newWidth);
+      rect.height(newHeight);
+    }
+
+    if (htmlLayer) {
+      htmlLayer.setSize({ width: newWidth, height: newHeight });
+    }
+
+ 
+  };
+
+  const codeBlockTransformerConfig: TransformerConfig = {
+    enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'middle-left', 'middle-right'],
+    boundBoxFunc: (oldBox, newBox) => {
+      // Limit minimum size
+      if (newBox.width < 100) newBox.width = 100;
+      if (newBox.height < 50) newBox.height = 50;
+      return newBox;
+    },
+    keepRatio: false,
+    rotateEnabled: false,
   };
 
   // Function to get theme object from string
@@ -293,6 +372,7 @@ function Canvas({
                 }}
             />
           )}
+
           {/* Rendering all rectangles */}
           {rectangles.map((rect, i) => (
             <Rect
@@ -366,38 +446,51 @@ function Canvas({
               key={i}
               x={codeBlock.x}
               y={codeBlock.y}
+              width={codeBlock.width}
+              height={codeBlock.height}
               id={`codeBlock${i}`}
               draggable
-              onClick={(e) => handleSelect(e, `codeBlock${i}`)}
+              onClick={(e) => handleCodeBlockSelect(e, `codeBlock${i}`)}
               onDragEnd={(e) => {
                 updateCodeBlockPosition(i, e.target.x(), e.target.y());
               }}
+              onTransform={(e) => handleCodeBlockTransform(i, e)}
             >
               <Rect
                 width={codeBlock.width}
                 height={codeBlock.height}
                 fill="white"
-                stroke="black"
-                strokeWidth={1}
+                stroke="red"
+                strokeWidth={8}
               />
-              <Html>
-                <div style={{ width: `${codeBlock.width}px`, height: `${codeBlock.height}px`, overflow: 'hidden' }}>
-                  <CodeMirror
-                    value={codeBlock.content}
-                    height={`${codeBlock.height}px`}
-                    theme={getThemeObject(codeBlock.theme)}
-                    extensions={[loadLanguage(codeBlock.language) || []]}
-                    onChange={(value) => {
-                      updateCodeContent(i, value);
-                    }}
-                  />
-                </div>
+              <Html divProps={{
+                style: {
+                  width: `${codeBlock.width}px`,
+                  height: `${codeBlock.height}px`,
+                  overflow: 'hidden'
+                }
+              }}>
+                <CodeMirror
+                  value={codeBlock.content}
+                  height={`${codeBlock.height}px`}
+                  width={`${codeBlock.width}px`}
+                  theme={getThemeObject(codeBlock.theme)}
+                  extensions={[loadLanguage(codeBlock.language) || []]}
+                  onChange={(value) => {
+                    updateCodeContent(i, value);
+                  }}
+                />
               </Html>
             </Group>
           ))}
+        
           {isEditingElement && <SetElement onElementSet={handleElementSet} />}
           {/* Transformer for resizing and rotating shapes */}
           <Transformer ref={transformerRef} ignoreStroke={true} />
+          <Transformer
+            ref={codeBlockTransformerRef}
+            {...codeBlockTransformerConfig}
+          />
         </Layer>
       </Stage>
     </div>
