@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-// Importing necessary components from react-konva for rendering on canvas
+import { useEffect, useRef} from "react";
 import {
   Stage,
   Layer,
@@ -15,189 +14,47 @@ import Konva from "konva";
 import RectTool from "./rectTool"; // For drawing rectangles
 import LineTool from "./lineTool"; // For drawing lines
 import ArrowTool from "./arrowTool"; // For drawing arrows
-import { SetElement, elementtext } from "./setElement"; // For adding text
-import { CustomRect, CustomLine, CustomArrow, CustomText, CustomCodeBlock, } from "./types"; // Types for shapes
+import { SetElement } from "./setElement"; // For adding text
 import { TextBox } from "./TextBox";
 import CodeBlockTool from "./codeBlockTool";
 import { Html } from "react-konva-utils";
 import CodeMirror from '@uiw/react-codemirror';
 import { okaidia } from '@uiw/codemirror-theme-okaidia';
-import { loadLanguage } from '@uiw/codemirror-extensions-langs';
-import { TransformerConfig } from 'konva/lib/shapes/Transformer';
-
-
-function ShortId(): string {
-  const timestamp = Date.now().toString(36).substr(3, 3); // Convert timestamp to base-36
-  const randomString = Math.random().toString(36).substr(2, 2); // Generate a random 5-character string
-  return `${timestamp}-${randomString}`;
-}
+import { loadLanguage, LanguageName } from '@uiw/codemirror-extensions-langs';
+import { useToolContext } from "./Contexts/ToolContext";
+import { useShapesContext } from "./Contexts/ShapesContext";
+import { InfiniteCanvas } from "./utils/InfiniteCanvas";
+import { createZoomHandler } from './utils/ZoomHandler';
+import { ShortId } from './utils/ShortId';
+import { useStageContext } from './Contexts/StageContext';
+import { useSelectionContext } from './Contexts/SelectionContext';
+import { useCanvasEventHandlers } from "./utils/CanvasEventHandlers";
+import { handleCodeBlockTransform, codeBlockTransformerConfig } from './utils/CodeBlockTransformHandler';
 
 // Main Canvas component where the drawing happens
-function Canvas({
-  tool, // The current tool selected by the user
-  rectangles, // Array of rectangles to be drawn
-  lines, // Array of lines to be drawn
-  arrows, // Array of arrows to be drawn
-  texts, // Array of texts to be drawn
-  codeBlocks, // Array of code blocks to be drawn
-  addRectangle, // Function to add a rectangle
-  addLine, // Function to add a line
-  addArrow, // Function to add an arrow
-  addText, // Function to add a text
-  addCodeBlock, // Function to add a code block
-  updateTextPosition, // Function to update position of a text
-  updateRectPosition, // Function to update position of a rectangle
-  updateLinePosition, // Function to update position of a line
-  updateArrowPosition, // Function to update position of an arrow
-  updateCodeBlockPosition, // Function to update position of a code block
-  updateCodeContent,
-  updateShapeElement,
-  deleteShape, // Function to delete a selected shape
-  updateCodeBlockDimensions, // Function to update dimensions of a code block
-}: {
-  tool: string;
-  rectangles: CustomRect[];
-  lines: CustomLine[];
-  arrows: CustomArrow[];
-  texts: CustomText[];
-  codeBlocks: CustomCodeBlock[];
-  addRectangle: (rect: CustomRect) => void;
-  addLine: (line: CustomLine) => void;
-  addArrow: (arrow: CustomArrow) => void;
-  addText: (text: CustomText) => void;
-  addCodeBlock: (codeBlock: CustomCodeBlock) => void;
-  updateTextPosition: (index: number, x: number, y: number) => void;
-  updateRectPosition: (index: number, x: number, y: number) => void;
-  updateLinePosition: (index: number, x: number, y: number) => void;
-  updateArrowPosition: (index: number, x: number, y: number) => void;
-  updateCodeBlockPosition: (index: number, x: number, y: number) => void;
-  updateCodeContent: (index: number, content: string) => void;
-  updateShapeElement: (id: string, element: string) => void;
-  deleteShape: (id: string) => void;
-  updateCodeBlockDimensions: (index: number, width: number, height: number) => void;
-}) {
-  // Infinte Canvas <----
-  const WIDTH = 100;
-  const HEIGHT = 100;
+function Canvas() {
+  const { rectangles, lines, arrows, texts, codeBlocks, addRectangle, addLine, addArrow, addText, addCodeBlock, updateRectPosition, updateLinePosition, updateArrowPosition, updateTextPosition, updateCodeBlockPosition, updateCodeContent, deleteShape, updateShapeElement, updateCodeBlockDimensions} = useShapesContext();
+ // Tool Context.
+  const { tool } = useToolContext();
+  // Stage Context.
+  const { stagePos, setStagePos, stageScale, setStageScale, stageDrag} = useStageContext();
+  const { selectedShape, setSelectedShape, isEditingElement, selectedCodeBlock, codeBlockTransformerRef } = useSelectionContext();
 
-  const grid = [
-    ["white", "white"],
-    ["white", "white"],
-  ];
-  const [stagePos, setStagePos] = React.useState({ x: 0, y: 0 });
-  const [stageScale, setStageScale] = React.useState(1);
-  const [stageDrag, setStageDrag] = React.useState(false);
-  const [prevTool, setprevTool] = React.useState("");
-  const startX = Math.floor((-stagePos.x - window.innerWidth) / WIDTH) * WIDTH;
-  const endX =
-    Math.floor((-stagePos.x + window.innerWidth * 2) / WIDTH) * WIDTH;
-
-  const startY =
-    Math.floor((-stagePos.y - window.innerHeight) / HEIGHT) * HEIGHT;
-  const endY =
-    Math.floor((-stagePos.y + window.innerHeight * 2) / HEIGHT) * HEIGHT;
-
-  const gridComponents = [];
-  var i: number = 0;
-  for (var x: number = startX; x < endX; x += WIDTH) {
-    for (var y: number = startY; y < endY; y += HEIGHT) {
-      if (i === 4) {
-        i = 0;
-      }
-
-      const indexX = Math.abs(x / WIDTH) % grid.length;
-      const indexY = Math.abs(y / HEIGHT) % grid[0].length;
-
-      gridComponents.push(
-        <Rect
-          x={x}
-          y={y}
-          width={WIDTH}
-          height={HEIGHT}
-          fill={grid[indexX][indexY]}
-          stroke="black"
-        />,
-      );
-    }
-  }
-
-  // ---->
-  // zoom in and out
-  const handleWheel = (e) => {
-    e.evt.preventDefault();
-
-    const scaleBy = 1.1;
-    const stage = e.target.getStage();
-    const oldScale = stage.scaleX();
-    const mousePointTo = {
-      x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
-      y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale,
-    };
-
-    const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
-
-    setStageScale(newScale);
-    const stageX =
-      -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale;
-    const stageY =
-      -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale;
-    setStagePos({ x: stageX, y: stageY });
-  };
-
-  // References for the stage and transformer (used for manipulating shapes)
-  const stageRef = React.useRef<Konva.Stage>(null);
+  const stageRef = useRef<Konva.Stage>(null);
+  const { handleKeyDown, handleKeyUp, handleElementSet, handleSelect, handleCodeBlockSelect } = useCanvasEventHandlers(stageRef);
   const transformerRef = useRef<Konva.Transformer>(null);
-  const [selectedShape, setSelectedShape] = useState<string | null>(null); // State to track the selected shape
-  const [isEditingElement, setIsEditingElement] = useState(false);
-
-  const [selectedCodeBlock, setSelectedCodeBlock] = useState<string | null>(null);
-  const codeBlockTransformerRef = useRef<Konva.Transformer>(null);
-
-  // Function to handle key down events, specifically for deleting shapes
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Delete" && selectedShape) {
-      deleteShape(selectedShape); // Delete the selected shape if 'Delete' key is pressed
-      setSelectedShape(null); // Deselect the shape after deletion
-    } else if (e.key === "/" && selectedShape) {
-      setIsEditingElement(true); // Enable editing when slash key is pressed
-    } else if (e.key === " ") {
-      setStageDrag(true); // Enable dragging when Space key is pressed}
-      setprevTool(tool);
-      tool = "line";
-    }
-  };
-
-  //console.log(codeBlocks);
-  const handleKeyUp = (e: KeyboardEvent) => {
-    if (e.key === " ") {
-      setStageDrag(false); // disable dragging when Space key is not pressed}
-      tool = prevTool;
-      setprevTool("");
-    }
-  };
-  const handleElementSet = () => {
-    if (selectedShape) {
-      const selectedNode = stageRef.current?.findOne(`#${selectedShape}`);
-      const uid = selectedNode?.getAttr("uid");
-
-      updateShapeElement(uid, elementtext);
-      console.log(
-        `UID: ${uid}, Shape: ${selectedShape}, Node: ${selectedNode}`,
-      );
-      setIsEditingElement(false); // Disable editing after element is set
-    }
-  };
 
   // Add event listener for keydown on mount and remove on unmount
   useEffect(() => {
+    console.log("Adding keydown event listener");
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
-    //window.addEventListener("wheel", handlew)
     return () => {
+      console.log("Removing keydown event listener");
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [selectedShape, stageDrag]);
+  }, [handleKeyDown, handleKeyUp]);
 
   // Update transformer when selected shape changes
   useEffect(() => {
@@ -226,69 +83,8 @@ function Canvas({
     }
   }, [selectedCodeBlock]);
 
-  // Function to handle selecting a shape
-  const handleSelect = (e: Konva.KonvaEventObject<MouseEvent>, id: string) => {
-    setSelectedShape(id); // Set the selected shape's ID
-    
-  };
-
-  const handleCodeBlockSelect = (e: Konva.KonvaEventObject<MouseEvent>, id: string) => {
-    setSelectedCodeBlock(id);
-    setSelectedShape(null); // Deselect other shapes
-    console.log(selectedCodeBlock);
-  };
-
-  const handleCodeBlockTransform = (index: number, e: Konva.KonvaEventObject<Event>) => {
-    const node = e.target as Konva.Group;
-    console.log(node.attrs)
-    const scaleX = node.scaleX();
-    const scaleY = node.scaleY();
-
-    // Update width and height, reset scale
-    const newWidth = Math.max(Math.round(node.width() * scaleX), 100);
-    const newHeight = Math.max(Math.round(node.height() * scaleY), 50);
-
-    // Directly update the node
-    node.width(newWidth);
-    node.height(newHeight);
-    
-    // Update the codeBlocks array with new dimensions
-    codeBlocks[index] = {
-      ...codeBlocks[index],
-      width: newWidth,
-      height: newHeight
-    };
-    updateCodeBlockPosition(index, node.x(), node.y());
-    updateCodeBlockDimensions(index, newWidth, newHeight);
-    node.scaleX(1);
-    node.scaleY(1);
-
-    // Update the rectangle and HTML content inside the group
-    const rect = node.findOne('Rect') as Konva.Rect;
-    const htmlLayer = node.findOne('HTMLLayer') as any; // Konva doesn't have a specific type for HTML layers
-
-    if (rect) {
-      rect.width(newWidth);
-      rect.height(newHeight);
-    }
-
-    if (htmlLayer) {
-      htmlLayer.setSize({ width: newWidth, height: newHeight });
-    }
-
- 
-  };
-
-  const codeBlockTransformerConfig: TransformerConfig = {
-    enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'middle-left', 'middle-right'],
-    boundBoxFunc: (oldBox, newBox) => {
-      // Limit minimum size
-      if (newBox.width < 100) newBox.width = 100;
-      if (newBox.height < 50) newBox.height = 50;
-      return newBox;
-    },
-    keepRatio: false,
-    rotateEnabled: false,
+  const handleCodeBlockTransformWrapper = (index: number, e: Konva.KonvaEventObject<Event>) => {
+    handleCodeBlockTransform(index, e, codeBlocks, updateCodeBlockPosition, updateCodeBlockDimensions);
   };
 
   // Function to get theme object from string
@@ -305,7 +101,7 @@ function Canvas({
   return (
     <div>
       <Stage
-        onWheel={handleWheel}
+        onWheel={createZoomHandler({ setStageScale, setStagePos })}
         scaleX={stageScale}
         scaleY={stageScale}
         x={stagePos.x}
@@ -319,12 +115,13 @@ function Canvas({
         ref={stageRef}
         onMouseDown={(e) => {
           if (e.target === stageRef.current) {
-            setSelectedShape(null); // Deselect if clicking on empty space
+            console.log("Clicked on empty canvas. Deselecting shape.");
+            setSelectedShape(null);
           }
         }}
       >
         <Layer>
-          {gridComponents}
+          {InfiniteCanvas({ stagePos })}
 
           {tool === "selection" && <SelectionBox stageRef={stageRef} />}
           {tool === "rect" && (
@@ -454,7 +251,7 @@ function Canvas({
               onDragEnd={(e) => {
                 updateCodeBlockPosition(i, e.target.x(), e.target.y());
               }}
-              onTransform={(e) => handleCodeBlockTransform(i, e)}
+              onTransform={(e) => handleCodeBlockTransformWrapper(i, e)}
             >
               <Rect
                 width={codeBlock.width}
@@ -475,7 +272,7 @@ function Canvas({
                   height={`${codeBlock.height}px`}
                   width={`${codeBlock.width}px`}
                   theme={getThemeObject(codeBlock.theme)}
-                  extensions={[loadLanguage(codeBlock.language) || []]}
+                  extensions={[loadLanguage(codeBlock.language as LanguageName) || []]}
                   onChange={(value) => {
                     updateCodeContent(i, value);
                   }}
@@ -487,10 +284,7 @@ function Canvas({
           {isEditingElement && <SetElement onElementSet={handleElementSet} />}
           {/* Transformer for resizing and rotating shapes */}
           <Transformer ref={transformerRef} ignoreStroke={true} />
-          <Transformer
-            ref={codeBlockTransformerRef}
-            {...codeBlockTransformerConfig}
-          />
+          <Transformer ref={codeBlockTransformerRef} {...codeBlockTransformerConfig} />
         </Layer>
       </Stage>
     </div>

@@ -1,13 +1,10 @@
-import React from "react";
 import "./toolPanel.css";
+import { useToolContext } from "./Contexts/ToolContext";
+import { useShapesContext } from "./Contexts/ShapesContext";
 
-interface ToolPanelProps {
-  setTool: (tool: string) => void;
-  saveShapes: () => void;
-  loadShapes: () => void;
-}
-
-function ToolPanel({ setTool, saveShapes, loadShapes }: ToolPanelProps) {
+function ToolPanel() {
+  const { setTool } = useToolContext();
+  const { saveShapes, loadShapes } = useShapesContext();
   return (
     <div className="tool-panel">
       <button onClick={() => setTool("none")}>None</button>

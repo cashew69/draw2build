@@ -51,7 +51,7 @@ function RectTool({
   const handleMouseUp = () => {
     setIsDrawing(false);
     /*setRectangles((prevRects) => [...prevRects, newRect]);
-    console.log(rectangles);*/
+    */
     if (newRect) addRectangle(newRect);
     setNewRect(null);
   };

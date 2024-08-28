@@ -34,7 +34,7 @@ function CodeBlockTool({ stageRef, addCodeBlock }: {stageRef: React.RefObject<Ko
 
   const handleCodeChange = (value: string) => {
     setCodeContent(value);
-    console.log("Code Changing");
+    
   };
 
   const handleCodeBlockPlace = () => {
