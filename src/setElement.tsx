@@ -1,23 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Group } from "react-konva";
 import { Html } from "react-konva-utils";
+import { useShapesContext } from "./Contexts/ShapesContext";
+import { useSelectionContext } from "./Contexts/SelectionContext";
 
-export let elementtext = "";
-
-export function SetElement({ onElementSet }: { onElementSet: () => void }) {
+export function SetElement({ onElementSet }: { onElementSet: (elementText: string) => void }) {
   const [textValue, setTextValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const { updateShapeElement } = useShapesContext();
+  const { selectedShape } = useSelectionContext();
 
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && textValue.trim() !== "") {
-      elementtext = textValue;
-      onElementSet(); // Call the callback function to set the element text
+      if (selectedShape) {
+        updateShapeElement(selectedShape, textValue);
+        onElementSet(textValue); // Pass the textValue to onElementSet
+        setTextValue(""); // Clear input after adding
+      }
     }
   };
 

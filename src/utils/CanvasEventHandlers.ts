@@ -59,12 +59,14 @@ export function useCanvasEventHandlers(stageRef: React.RefObject<Konva.Stage>) {
     }
   }, [setStageDrag, setTool, prevTool]);
 
-  const handleElementSet = useCallback(() => {
+  const handleElementSet = useCallback((elementText: string) => {
     if (selectedShape) {
       const selectedNode = stageRef.current?.findOne(`#${selectedShape}`);
       const uid = selectedNode?.getAttr("uid");
 
-      updateShapeElement(uid, "elementtext"); // Note: You might need to pass elementtext as a parameter
+      if (uid) {
+        updateShapeElement(uid, elementText);
+      }
       setIsEditingElement(false); // Disable editing after element is set
     }
   }, [selectedShape, stageRef, updateShapeElement, setIsEditingElement]);

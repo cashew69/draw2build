@@ -106,27 +106,47 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
     // Function to update the element property of a shape
-    const updateShapeElement = (uid: string, element: string) => {
+    const updateShapeElement = (id: string, element: string) => {
+        const shapeType = id.replace(/\d+$/, '');
+        const index = parseInt(id.match(/\d+$/)?.[0] || '0', 10);
         
-        setRectangles((prevRectangles) =>
-          prevRectangles.map((rect) =>
-            rect.uid === uid ? { ...rect, element } : rect,
-          ),
-        );
-        setLines((prevLines) =>
-          prevLines.map((line) => (line.uid === uid ? { ...line, element } : line)),
-        );
-        setArrows((prevArrows) =>
-          prevArrows.map((arrow) =>
-            arrow.uid === uid ? { ...arrow, element } : arrow,
-          ),
-        );
-        setTexts((prevTexts) =>
-          prevTexts.map((text) => (text.uid === uid ? { ...text, element } : text)),
-        );
-        setCodeBlocks((prevCodeBlocks) =>
-          prevCodeBlocks.map((codeBlock) => (codeBlock.uid === uid ? { ...codeBlock, element } : codeBlock)),
-        );
+        switch (shapeType) {
+          case 'rect':
+            setRectangles((prevRectangles) =>
+              prevRectangles.map((rect, i) =>
+                i === index ? { ...rect, element } : rect
+              )
+            );
+            break;
+          case 'line':
+            setLines((prevLines) =>
+              prevLines.map((line, i) =>
+                i === index ? { ...line, element } : line
+              )
+            );
+            break;
+          case 'arrow':
+            setArrows((prevArrows) =>
+              prevArrows.map((arrow, i) =>
+                i === index ? { ...arrow, element } : arrow
+              )
+            );
+            break;
+          case 'text':
+            setTexts((prevTexts) =>
+              prevTexts.map((text, i) =>
+                i === index ? { ...text, element } : text
+              )
+            );
+            break;
+          case 'codeBlock':
+            setCodeBlocks((prevCodeBlocks) =>
+              prevCodeBlocks.map((codeBlock, i) =>
+                i === index ? { ...codeBlock, element } : codeBlock
+              )
+            );
+            break;
+        }
       };
 
   const updateCodeBlockDimensions = (index: number, width: number, height: number) => {

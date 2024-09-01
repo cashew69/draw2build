@@ -30,6 +30,7 @@ import { useStageContext } from './Contexts/StageContext';
 import { useSelectionContext } from './Contexts/SelectionContext';
 import { useCanvasEventHandlers } from "./utils/CanvasEventHandlers";
 import { handleCodeBlockTransform, codeBlockTransformerConfig } from './utils/CodeBlockTransformHandler';
+import ShapeConnections from './ShapesConnections';
 
 // Main Canvas component where the drawing happens
 function Canvas() {
@@ -285,6 +286,7 @@ function Canvas() {
           {/* Transformer for resizing and rotating shapes */}
           <Transformer ref={transformerRef} ignoreStroke={true} />
           <Transformer ref={codeBlockTransformerRef} {...codeBlockTransformerConfig} />
+          <ShapeConnections />
         </Layer>
       </Stage>
     </div>

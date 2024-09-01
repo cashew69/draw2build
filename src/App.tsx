@@ -1,3 +1,5 @@
+import React from 'react';
+import { ConnectionProvider } from './Contexts/ConnectionContext';
 import Canvas from "./Canvas.tsx";
 import { ToolProvider } from "./Contexts/ToolContext.tsx";
 import { ShapesProvider } from "./Contexts/ShapesContext.tsx";
@@ -16,14 +18,16 @@ function AppContent() {
 
 export function App() {
   return (
-    <ShapesProvider>
-      <ToolProvider>
-        <StageProvider>
-        <SelectionProvider>
-          <AppContent />
-        </SelectionProvider>
-        </StageProvider>
-      </ToolProvider>
-    </ShapesProvider>
+    <ConnectionProvider>
+      <ShapesProvider>
+        <ToolProvider>
+          <StageProvider>
+          <SelectionProvider>
+            <AppContent />
+          </SelectionProvider>
+          </StageProvider>
+        </ToolProvider>
+      </ShapesProvider>
+    </ConnectionProvider>
   );
 }
