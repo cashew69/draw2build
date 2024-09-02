@@ -1,5 +1,5 @@
 # draw2build
-Connections.
+last updated 02/09/24 -> brezier Curve
 
 # Video Status as of 01/09/24 
 [![YouTube](http://i.ytimg.com/vi/4TSN-nVM5ZA/hqdefault.jpg)](https://youtu.be/4TSN-nVM5ZA)
