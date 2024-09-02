@@ -4,10 +4,10 @@ import { Html } from "react-konva-utils";
 import { useShapesContext } from "./Contexts/ShapesContext";
 import { useSelectionContext } from "./Contexts/SelectionContext";
 
-export function SetElement({ onElementSet }: { onElementSet: (elementText: string) => void }) {
+export function SetElement({ onElementSet }: { onElementSet: () => void }) {
   const [textValue, setTextValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const { updateShapeElement } = useShapesContext();
+  const { updateShapeConnections } = useShapesContext();
   const { selectedShape } = useSelectionContext();
 
   useEffect(() => {
@@ -15,11 +15,15 @@ export function SetElement({ onElementSet }: { onElementSet: (elementText: strin
       inputRef.current.focus();
     }
   }, []);
+  
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && textValue.trim() !== "") {
       if (selectedShape) {
-        updateShapeElement(selectedShape, textValue);
-        onElementSet(textValue); // Pass the textValue to onElementSet
+        const [action, uid] = textValue.split(":");
+        if (action === "add" || action === "delete") {
+          updateShapeConnections(selectedShape, action, uid);
+        }
+        onElementSet(); // Pass the textValue to onElementSet
         setTextValue(""); // Clear input after adding
       }
     }

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Arrow, Group } from 'react-konva';
+import { Arrow, Group} from 'react-konva';
 import { useShapesContext } from './Contexts/ShapesContext';
 import { CustomRect, CustomLine, CustomArrow, CustomText, CustomCodeBlock } from './types';
 
@@ -14,33 +14,36 @@ const ShapeConnections: React.FC = () => {
 
   const connections = useMemo(() => {
     return allShapes.flatMap(shape => {
-      if (!shape.element) {
-        console.log('Shape without element:', shape);
+      if (!shape.connections || shape.connections.length === 0) {
+        console.log('Shape without connections:', shape);
         return [];
       }
 
-      const targetShape = allShapes.find(s => s.uid === shape.element);
-      if (!targetShape) {
-        console.log('Target shape not found:', shape.element);
-        return [];
-      }
+      return shape.connections.map(connection => {
+        const targetShape = allShapes.find(s => s.uid === connection);
+        if (!targetShape) {
+          console.log('Target shape not found:', connection);
+          return null;
+        }
 
-      console.log('Creating connection:', shape, targetShape);
+        console.log('Creating connection:', shape, targetShape);
 
-      const startX = getShapeCenter(shape).x;
-      const startY = getShapeCenter(shape).y;
-      const endX = getShapeCenter(targetShape).x;
-      const endY = getShapeCenter(targetShape).y;
+        const startX = getShapeCenter(shape).x;
+        const startY = getShapeCenter(shape).y;
+        const endX = getShapeCenter(targetShape).x;
+        const endY = getShapeCenter(targetShape).y;
 
-      return (
-        <Arrow
-          key={`${shape.uid}-${shape.element}`}
-          points={[startX, startY, endX, endY]}
-          fill="black"
-          stroke="black"
-          strokeWidth={2}
-        />
-      );
+        return (
+          <Arrow
+            key={`${shape.uid}-${connection}`}
+            points={[startX, startY, (startX + endX) / 2, startY, (startX + endX) / 2, endY, endX, endY]}
+            bezier
+            fill="black"
+            stroke="black"
+            strokeWidth={2}
+          />
+        );
+      }).filter(connection => connection !== null);
     });
   }, [allShapes]);
 

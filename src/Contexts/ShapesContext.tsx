@@ -19,7 +19,7 @@ interface ShapesContextType {
   updateCodeBlockPosition: (index: number, x: number, y: number) => void;
   updateCodeContent: (index: number, content: string) => void;
   deleteShape: (id: string) => void;
-  updateShapeElement: (uid: string, element: string) => void;
+  updateShapeConnections: (id: string, action: "add" | "delete", connection: string) => void;
   updateCodeBlockDimensions: (index: number, width: number, height: number) => void;
   saveShapes: () => void;
   loadShapes: () => void;
@@ -105,8 +105,8 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
     } 
   };
 
-    // Function to update the element property of a shape
-    const updateShapeElement = (id: string, element: string) => {
+    // Function to update the connections property of a shape
+    const updateShapeConnections = (id: string, action: 'add' | 'delete', connection: string) => {
         const shapeType = id.replace(/\d+$/, '');
         const index = parseInt(id.match(/\d+$/)?.[0] || '0', 10);
         
@@ -114,35 +114,60 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
           case 'rect':
             setRectangles((prevRectangles) =>
               prevRectangles.map((rect, i) =>
-                i === index ? { ...rect, element } : rect
+                i === index ? { 
+                  ...rect, 
+                  connections: action === 'add' 
+                    ? [...(rect.connections || []), connection] 
+                    : (rect.connections || []).filter(conn => conn !== connection) 
+                } : rect
               )
             );
             break;
           case 'line':
             setLines((prevLines) =>
               prevLines.map((line, i) =>
-                i === index ? { ...line, element } : line
+                i === index ? { 
+                  ...line, 
+                  connections: action === 'add' 
+                    ? [...(line.connections || []), connection] 
+                    : (line.connections || []).filter(conn => conn !== connection) 
+                } : line
               )
             );
             break;
           case 'arrow':
             setArrows((prevArrows) =>
               prevArrows.map((arrow, i) =>
-                i === index ? { ...arrow, element } : arrow
+                i === index ? { 
+                  ...arrow, 
+                  connections: action === 'add' 
+                    ? [...(arrow.connections || []), connection] 
+                    : (arrow.connections || []).filter(conn => conn !== connection) 
+                } : arrow
               )
             );
             break;
           case 'text':
             setTexts((prevTexts) =>
               prevTexts.map((text, i) =>
-                i === index ? { ...text, element } : text
+                i === index ? { 
+                  ...text, 
+                  connections: action === 'add' 
+                    ? [...(text.connections || []), connection] 
+                    : (text.connections || []).filter(conn => conn !== connection) 
+                } : text
               )
             );
             break;
           case 'codeBlock':
             setCodeBlocks((prevCodeBlocks) =>
               prevCodeBlocks.map((codeBlock, i) =>
-                i === index ? { ...codeBlock, element } : codeBlock
+                i === index ? { 
+                  ...codeBlock, 
+                  connections: action === 'add' 
+                    ? [...(codeBlock.connections || []), connection] 
+                    : (codeBlock.connections || []).filter(conn => conn !== connection) 
+                } : codeBlock
               )
             );
             break;
@@ -215,7 +240,7 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
       updateCodeBlockPosition,
       updateCodeContent,
       deleteShape,
-      updateShapeElement,
+      updateShapeConnections,
       updateCodeBlockDimensions,
       saveShapes,
       loadShapes,

@@ -1,5 +1,4 @@
-import React from 'react';
-import { ConnectionProvider } from './Contexts/ConnectionContext';
+
 import Canvas from "./Canvas.tsx";
 import { ToolProvider } from "./Contexts/ToolContext.tsx";
 import { ShapesProvider } from "./Contexts/ShapesContext.tsx";
@@ -18,7 +17,6 @@ function AppContent() {
 
 export function App() {
   return (
-    <ConnectionProvider>
       <ShapesProvider>
         <ToolProvider>
           <StageProvider>
@@ -28,6 +26,5 @@ export function App() {
           </StageProvider>
         </ToolProvider>
       </ShapesProvider>
-    </ConnectionProvider>
   );
 }

@@ -34,7 +34,7 @@ import ShapeConnections from './ShapesConnections';
 
 // Main Canvas component where the drawing happens
 function Canvas() {
-  const { rectangles, lines, arrows, texts, codeBlocks, addRectangle, addLine, addArrow, addText, addCodeBlock, updateRectPosition, updateLinePosition, updateArrowPosition, updateTextPosition, updateCodeBlockPosition, updateCodeContent, deleteShape, updateShapeElement, updateCodeBlockDimensions} = useShapesContext();
+  const { rectangles, lines, arrows, texts, codeBlocks, addRectangle, addLine, addArrow, addText, addCodeBlock, updateRectPosition, updateLinePosition, updateArrowPosition, updateTextPosition, updateCodeBlockPosition, updateCodeContent, updateCodeBlockDimensions} = useShapesContext();
  // Tool Context.
   const { tool } = useToolContext();
   // Stage Context.
@@ -42,7 +42,7 @@ function Canvas() {
   const { selectedShape, setSelectedShape, isEditingElement, selectedCodeBlock, codeBlockTransformerRef } = useSelectionContext();
 
   const stageRef = useRef<Konva.Stage>(null);
-  const { handleKeyDown, handleKeyUp, handleElementSet, handleSelect, handleCodeBlockSelect } = useCanvasEventHandlers(stageRef);
+  const { handleKeyDown, handleKeyUp, handleElementSet, handleSelect, handleCodeBlockSelect } = useCanvasEventHandlers();
   const transformerRef = useRef<Konva.Transformer>(null);
 
   // Add event listener for keydown on mount and remove on unmount

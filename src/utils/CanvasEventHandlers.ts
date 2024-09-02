@@ -5,8 +5,8 @@ import { useToolContext } from '../Contexts/ToolContext';
 import { useStageContext } from '../Contexts/StageContext';
 import Konva from 'konva';
 
-export function useCanvasEventHandlers(stageRef: React.RefObject<Konva.Stage>) {
-  const { deleteShape, updateShapeElement, rectangles, lines, arrows, texts, codeBlocks } = useShapesContext();
+export function useCanvasEventHandlers() {
+  const { deleteShape, rectangles, lines, arrows, texts, codeBlocks } = useShapesContext();
   const { selectedShape, setSelectedShape, setIsEditingElement, selectedCodeBlock, setSelectedCodeBlock } = useSelectionContext();
   const { tool, setTool } = useToolContext();
   const { setStageDrag } = useStageContext();
@@ -59,24 +59,16 @@ export function useCanvasEventHandlers(stageRef: React.RefObject<Konva.Stage>) {
     }
   }, [setStageDrag, setTool, prevTool]);
 
-  const handleElementSet = useCallback((elementText: string) => {
-    if (selectedShape) {
-      const selectedNode = stageRef.current?.findOne(`#${selectedShape}`);
-      const uid = selectedNode?.getAttr("uid");
+  const handleElementSet = useCallback(() => {
+    setIsEditingElement(false); // Disable editing after element is set
+  }, [setIsEditingElement]);
 
-      if (uid) {
-        updateShapeElement(uid, elementText);
-      }
-      setIsEditingElement(false); // Disable editing after element is set
-    }
-  }, [selectedShape, stageRef, updateShapeElement, setIsEditingElement]);
-
-  const handleSelect = (e: Konva.KonvaEventObject<MouseEvent>, id: string) => {
+  const handleSelect = (_: Konva.KonvaEventObject<MouseEvent>, id: string) => {
     console.log("Shape selected:", id);
     setSelectedShape(id);
   };
 
-  const handleCodeBlockSelect = (e: Konva.KonvaEventObject<MouseEvent>, id: string) => {
+  const handleCodeBlockSelect = (_: Konva.KonvaEventObject<MouseEvent>, id: string) => {
     setSelectedCodeBlock(id);
     setSelectedShape(null);
   };

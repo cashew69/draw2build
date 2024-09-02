@@ -1,23 +1,22 @@
-import type { Extension } from "@uiw/react-codemirror";
 
 export interface CustomRect {
   x: number;
   y: number;
   width: number;
   height: number;
-  element?: string | null;
+  connections?: string[] | null;
   uid?: string;
 }
 
 export interface CustomLine {
   points: number[];
-  element?: string | null;
+  connections?: string[] | null;
   uid?: string;
 }
 
 export interface CustomArrow {
   points: number[];
-  element?: string | null;
+  connections?: string[] | null;
   uid?: string;
 }
 
@@ -31,7 +30,7 @@ export interface CustomText {
   fontSize?: number;
   draggable?: boolean;
   text: string;
-  element?: string | null;
+  connections?: string[] | null;
   uid?: string;
 }
 
@@ -44,7 +43,7 @@ export interface CustomCodeBlock {
   content: string;
   language: string;
   theme: string;
-  element: string;
+  connections?: string[] | null;
 }
 
 export interface CustomTemplate {
@@ -53,6 +52,6 @@ export interface CustomTemplate {
   width: number; 
   height: number; 
   content: string;
-  element?: string | null;
+  connections?: string[] | null;
   uid?: string;
 }
