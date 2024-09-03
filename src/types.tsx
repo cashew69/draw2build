@@ -38,6 +38,7 @@ export interface CustomCodeBlock {
   uid: string;
   x: number;
   y: number;
+  name: string;
   width: number;
   height: number;
   content: string;

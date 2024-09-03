@@ -23,6 +23,7 @@ interface ShapesContextType {
   updateCodeBlockDimensions: (index: number, width: number, height: number) => void;
   saveShapes: () => void;
   loadShapes: () => void;
+  updateCodeBlockName: (index: number, newName: string) => void;
 }
 
 const ShapesContext = createContext<ShapesContextType | undefined>(undefined);
@@ -176,7 +177,7 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateCodeBlockDimensions = (index: number, width: number, height: number) => {
     const updatedCodeBlocks = codeBlocks.map((codeBlock, i) =>
-      i === index ? { ...codeBlock, width, height } : codeBlock
+      i === index ? { ...codeBlock, width, height } : codeBlock,
     );
     setCodeBlocks(updatedCodeBlocks);
   };
@@ -221,6 +222,14 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
     input.click();
   };
 
+  const updateCodeBlockName = (index: number, newName: string) => {
+    setCodeBlocks(prevCodeBlocks => 
+      prevCodeBlocks.map((block, i) => 
+        i === index ? { ...block, name: newName } : block
+      )
+    );
+  };
+
   return (
     <ShapesContext.Provider value={{
       rectangles,
@@ -244,6 +253,7 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
       updateCodeBlockDimensions,
       saveShapes,
       loadShapes,
+      updateCodeBlockName,
     }}>
       {children}
     </ShapesContext.Provider>

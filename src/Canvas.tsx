@@ -29,12 +29,14 @@ import { ShortId } from './utils/ShortId';
 import { useStageContext } from './Contexts/StageContext';
 import { useSelectionContext } from './Contexts/SelectionContext';
 import { useCanvasEventHandlers } from "./utils/CanvasEventHandlers";
-import { handleCodeBlockTransform, codeBlockTransformerConfig } from './utils/CodeBlockTransformHandler';
+import { handleCodeBlockTransform, codeBlockTransformerConfig } from './utils/CodeBlock_utils/CodeBlockTransformHandler';
 import ShapeConnections from './ShapesConnections';
+import { useState } from "react";
+import { useCodeBlockNameHandler } from './utils/CodeBlock_utils/CodeBlockNameHandler';
 
 // Main Canvas component where the drawing happens
 function Canvas() {
-  const { rectangles, lines, arrows, texts, codeBlocks, addRectangle, addLine, addArrow, addText, addCodeBlock, updateRectPosition, updateLinePosition, updateArrowPosition, updateTextPosition, updateCodeBlockPosition, updateCodeContent, updateCodeBlockDimensions} = useShapesContext();
+  const { rectangles, lines, arrows, texts, codeBlocks, addRectangle, addLine, addArrow, addText, addCodeBlock, updateRectPosition, updateLinePosition, updateArrowPosition, updateTextPosition, updateCodeBlockPosition, updateCodeContent, updateCodeBlockDimensions, updateCodeBlockName} = useShapesContext();
  // Tool Context.
   const { tool } = useToolContext();
   // Stage Context.
@@ -44,6 +46,8 @@ function Canvas() {
   const stageRef = useRef<Konva.Stage>(null);
   const { handleKeyDown, handleKeyUp, handleElementSet, handleSelect, handleCodeBlockSelect } = useCanvasEventHandlers();
   const transformerRef = useRef<Konva.Transformer>(null);
+  const [renamingCodeBlock, setRenamingCodeBlock] = useState<string | null>(null);
+  const [tempName, setTempName] = useState<string>("");
 
   // Add event listener for keydown on mount and remove on unmount
   useEffect(() => {
@@ -129,7 +133,7 @@ function Canvas() {
             <RectTool
               stageRef={stageRef}
               addRectangle={(rect) => {
-                const newRect = { ...rect, uid: ShortId(), element: "" }; // Assign UUID
+                const newRect = { ...rect, uid: ShortId()}; // Assign UUID
                 addRectangle(newRect);
               }}
             />
@@ -138,7 +142,7 @@ function Canvas() {
             <LineTool
               stageRef={stageRef}
               addLine={(line) => {
-                const newLine = { ...line, uid: ShortId(), element: "" }; // Assign UUID
+                const newLine = { ...line, uid: ShortId()}; // Assign UUID
                 addLine(newLine);
               }}
             />
@@ -147,7 +151,7 @@ function Canvas() {
             <ArrowTool
               stageRef={stageRef}
               addArrow={(arrow) => {
-                const newArrow = { ...arrow, uid: ShortId(), element: "" }; // Assign UUID
+                const newArrow = { ...arrow, uid: ShortId()}; // Assign UUID
                 addArrow(newArrow);
               }}
             />
@@ -156,7 +160,7 @@ function Canvas() {
             <TextBox
               stageRef={stageRef}
               addText={(text) => {
-                const newText = { ...text, uid: ShortId(), element: "" }; // Assign UUID
+                const newText = { ...text, uid: ShortId()}; // Assign UUID
                 addText(newText);
               }}
               />
@@ -165,7 +169,7 @@ function Canvas() {
               <CodeBlockTool
                 stageRef={stageRef}
                 addCodeBlock={(codeBlock) => {
-                  const newCodeBlock = { ...codeBlock, uid: ShortId(), element: "" };
+                  const newCodeBlock = { ...codeBlock, uid: ShortId()};
                   addCodeBlock(newCodeBlock);
                 }}
             />
@@ -239,48 +243,112 @@ function Canvas() {
             />
           ))}
           {/* Rendering all code blocks */}
-          {codeBlocks.map((codeBlock, i) => (
-            <Group
-              key={i}
-              x={codeBlock.x}
-              y={codeBlock.y}
-              width={codeBlock.width}
-              height={codeBlock.height}
-              id={`codeBlock${i}`}
-              draggable
-              onClick={(e) => handleCodeBlockSelect(e, `codeBlock${i}`)}
-              onDragEnd={(e) => {
-                updateCodeBlockPosition(i, e.target.x(), e.target.y());
-              }}
-              onTransform={(e) => handleCodeBlockTransformWrapper(i, e)}
-            >
-              <Rect
+          {codeBlocks.map((codeBlock, i) => {
+            const { handleRename, handleSaveName, handleNameChange } = useCodeBlockNameHandler({
+              index: i,
+              currentName: codeBlock.name,
+              setRenamingCodeBlock,
+              setTempName,
+              updateCodeBlockName,
+            });
+
+            return (
+              <Group
+                key={i}
+                x={codeBlock.x}
+                y={codeBlock.y}
                 width={codeBlock.width}
                 height={codeBlock.height}
-                fill="white"
-                stroke="red"
-                strokeWidth={8}
-              />
-              <Html divProps={{
-                style: {
-                  width: `${codeBlock.width}px`,
-                  height: `${codeBlock.height}px`,
-                  overflow: 'hidden'
-                }
-              }}>
-                <CodeMirror
-                  value={codeBlock.content}
-                  height={`${codeBlock.height}px`}
-                  width={`${codeBlock.width}px`}
-                  theme={getThemeObject(codeBlock.theme)}
-                  extensions={[loadLanguage(codeBlock.language as LanguageName) || []]}
-                  onChange={(value) => {
-                    updateCodeContent(i, value);
+                id={`codeBlock${i}`}
+                onClick={(e) => handleCodeBlockSelect(e, `codeBlock${i}`)}
+                onDragEnd={(e) => {
+                  updateCodeBlockPosition(i, e.target.x(), e.target.y());
+                }}
+                onTransform={(e) => handleCodeBlockTransformWrapper(i, e)}
+                draggable
+              >
+                <Rect
+                  width={codeBlock.width}
+                  height={codeBlock.height}
+                  fill="#ccc"
+                  stroke="#ccc"
+                  strokeWidth={39}
+                  opacity={0}
+                  onMouseEnter={(e) => {
+                    const target = e.target as Konva.Shape;
+                    target.opacity(0.3);
+                    const stage = target.getStage();
+                    if (stage) {
+                      stage.container().style.cursor = 'move';
+                    }
+                    const layer = target.getLayer();
+                    if (layer) {
+                      layer.draw();
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.target as Konva.Shape;
+                    target.opacity(0);
+                    const stage = target.getStage();
+                    if (stage) {
+                      stage.container().style.cursor = 'default';
+                    }
+                    const layer = target.getLayer();
+                    if (layer) {
+                      layer.draw();
+                    }
                   }}
                 />
-              </Html>
-            </Group>
-          ))}
+                <Html 
+                divProps={{
+                  style: {
+                    width: `${codeBlock.width}px`,
+                    height: `${codeBlock.height}px`,
+                    overflow: 'hidden'
+                  }
+                }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+                    <div style={{ padding: '5px', backgroundColor: 'rgba(240, 240, 240, 0)', borderBottom: '1px solid rgba(204, 204, 204, 0)', display: 'flex', alignItems: 'center'}}>
+                      {renamingCodeBlock === `codeBlock${i}` ? (
+                        <>
+                          <input
+                            type="text"
+                            value={tempName}
+                            onChange={handleNameChange}
+                            style={{ flexGrow: 1, marginRight: '5px', backgroundColor: 'transparent' }}
+                          />
+                          <button 
+                            onClick={handleSaveName} 
+                            style={{ backgroundColor: 'green', color: 'white', border: 'none', padding: '2px 5px', marginRight: '5px' }}
+                          >
+                            ✓
+                          </button>
+                        </>
+                      ) : (
+                        <span 
+                          onDoubleClick={() => handleRename()}
+                          style={{ flexGrow: 1, color: 'rgba(0, 0, 0, 1)', fontWeight: 'bold'}}
+                        >
+                          {codeBlock.name}
+                        </span>
+                      )}
+                    </div>
+                    <CodeMirror
+                      value={codeBlock.content}
+                      height={`${codeBlock.height - 30}px`}
+                      width={`${codeBlock.width}px`}
+                      theme={getThemeObject(codeBlock.theme)}
+                      extensions={[loadLanguage(codeBlock.language as LanguageName) || []]}
+                      onChange={(value) => {
+                        updateCodeContent(i, value);
+                      }}
+                      editable={!stageDrag && renamingCodeBlock !== `codeBlock${i}`}
+                    />
+                  </div>
+                </Html>
+              </Group>
+            );
+          })}
         
           {isEditingElement && <SetElement onElementSet={handleElementSet} />}
           {/* Transformer for resizing and rotating shapes */}

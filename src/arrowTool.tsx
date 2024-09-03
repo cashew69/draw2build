@@ -11,28 +11,27 @@ function ArrowTool({
   stageRef: React.RefObject<Konva.Stage>;
   addArrow: (arrow: CustomArrow) => void;
 }) {
-  //const [arrows, setArrows] = useState<CustomArrow[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [newArrow, setNewArrow] = useState<CustomArrow>({ points: [] });
   const stage = stageRef.current;
   const scale = stageRef.current?.scaleX();
 
-  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleMouseDown = (_: Konva.KonvaEventObject<MouseEvent>) => {
     const pos = stageRef.current?.getPointerPosition();
     if (pos) {
       setNewArrow({
         points: [
-          (pos.x - stage?.x()) / scale,
-          (pos.y - stage?.y()) / scale,
-          (pos.x - stage?.x()) / scale,
-          (pos.y - stage?.y()) / scale,
+          (pos.x - (stage?.x() ?? 0)) / (scale ?? 1),
+          (pos.y - (stage?.y() ?? 0)) / (scale ?? 1),
+          (pos.x - (stage?.x() ?? 0)) / (scale ?? 1),
+          (pos.y - (stage?.y() ?? 0)) / (scale ?? 1),
         ],
       });
       setIsDrawing(true);
     }
   };
 
-  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleMouseMove = (_: Konva.KonvaEventObject<MouseEvent>) => {
     if (!isDrawing) return;
     const pos = stageRef.current?.getPointerPosition();
     if (pos) {
@@ -40,19 +39,17 @@ function ArrowTool({
         points: [
           prevArrow.points[0],
           prevArrow.points[1],
-          (pos.x - stage?.x()) / scale,
-          (pos.y - stage?.y()) / scale,
+          (pos.x - (stage?.x() ?? 0)) / (scale ?? 1),
+          (pos.y - (stage?.y() ?? 0)) / (scale ?? 1),
         ],
       }));
     }
   };
 
   const handleMouseUp = () => {
-    //setIsDrawing(false);
-    //setArrows((prevArrows) => [...prevArrows, newArrow]);
     setIsDrawing(false);
-    if (newArrow) addArrow(newArrow);
-    setNewArrow(null);
+    if (newArrow.points.length > 0) addArrow(newArrow);
+    setNewArrow({ points: [] });
   };
 
   useEffect(() => {

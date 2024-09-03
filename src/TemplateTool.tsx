@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Stage, Layer, Rect, Text } from 'react-konva';
-import { CustomRect, CustomTemplate } from './types';
+import { Rect, Text } from 'react-konva';
+import { CustomTemplate } from './types';
 import Konva from 'konva';
 
 
