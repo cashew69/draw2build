@@ -1,6 +1,6 @@
 # draw2build
 
-[![Concept Video](https://www.youtube.com/watch?v=hwF_Idx99Ls)
+[![YouTube](Concept Vide)](https://www.youtube.com/watch?v=hwF_Idx99Ls)
 
 # Video Status as of 04/09/24 
 [![YouTube](http://i.ytimg.com/vi/aD1NIK3pDyU/hqdefault.jpg)](https://youtu.be/aD1NIK3pDyU )
