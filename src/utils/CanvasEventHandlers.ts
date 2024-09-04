@@ -43,11 +43,22 @@ export function useCanvasEventHandlers() {
       setIsEditingElement(true); // Enable editing when slash key is pressed
     } 
     else if (e.key === " " && !isSpacePressed) {
-      e.preventDefault();
-      setIsSpacePressed(true);
-      setPrevTool(tool);
-      setStageDrag(true);
-      setTool("none");
+      const isTypingInInput = () => {
+        const activeElement = document.activeElement;
+        return (
+          activeElement instanceof HTMLInputElement ||
+          activeElement instanceof HTMLTextAreaElement ||
+          activeElement?.classList.contains('cm-content')
+        );
+      };
+
+      if (!isTypingInInput()) {
+        e.preventDefault();
+        setIsSpacePressed(true);
+        setPrevTool(tool);
+        setStageDrag(true);
+        setTool("none");
+      }
     }
   }, [selectedShape, deleteShape, setSelectedShape, rectangles, lines, arrows, texts, codeBlocks, selectedCodeBlock, setSelectedCodeBlock, setIsEditingElement, isSpacePressed, tool, setStageDrag, setTool]);
 

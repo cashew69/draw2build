@@ -16,6 +16,7 @@
     "@codemirror/legacy-modes": "^6.4.1",
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.33.0",
+    "@types/node": "^22.5.3",
     "@types/uuid": "^10.0.0",
     "@uiw/codemirror-extensions-langs": "^4.23.0",
     "@uiw/codemirror-theme-okaidia": "^4.23.0",

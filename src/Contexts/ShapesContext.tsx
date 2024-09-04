@@ -1,5 +1,11 @@
 import { createContext, useContext, useState } from "react";
 import { CustomRect, CustomLine, CustomArrow, CustomText, CustomCodeBlock } from "../types";
+import { useCodeBlockMap } from "./filename-uid";
+const extractImportedModules = (content: string): string[] => {
+  const importRegex = /^import\s+(\w+)|^from\s+(\w+)\s+import/gm;
+  const matches = [...content.matchAll(importRegex)];
+  return matches.map(match => match[1] || match[2]).filter(Boolean);
+};
 
 interface ShapesContextType {
   rectangles: CustomRect[];
@@ -34,6 +40,8 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
   const [arrows, setArrows] = useState<CustomArrow[]>([]);
   const [texts, setTexts] = useState<CustomText[]>([]);
   const [codeBlocks, setCodeBlocks] = useState<CustomCodeBlock[]>([]);
+  const { codeBlockMap, setCodeBlock } = useCodeBlockMap();
+
 
   const addRectangle = (rect: CustomRect) =>
     setRectangles([...rectangles, rect]);
@@ -78,9 +86,30 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateCodeContent = (index: number, content: string) => {
-    const updatedCodeBlocks = codeBlocks.map((codeBlock, i) =>
-      i === index ? { ...codeBlock, content } : codeBlock,
-    );
+    const updatedCodeBlocks = codeBlocks.map((codeBlock, i) => {
+      if (i === index) {
+        let newConnections = [...(codeBlock.connections || [])];
+        if (codeBlock.name.endsWith('.py')) {
+          const importedModules = extractImportedModules(content);
+          
+          // Add new connections
+          importedModules.forEach(moduleName => {
+            const importedCodeBlock = codeBlocks.find(cb => cb.name === `${moduleName}.py`);
+            if (importedCodeBlock && !newConnections.includes(importedCodeBlock.uid)) {
+              newConnections.push(importedCodeBlock.uid);
+            }
+          });
+          
+          // Remove old connections that are no longer imported
+          newConnections = newConnections.filter(connection => {
+            const connectedBlock = codeBlocks.find(cb => cb.uid === connection);
+            return connectedBlock && importedModules.includes(connectedBlock.name.replace('.py', ''));
+          });
+        }
+        return { ...codeBlock, content, connections: newConnections };
+      }
+      return codeBlock;
+    });
     setCodeBlocks(updatedCodeBlocks);
   };
 
@@ -190,6 +219,7 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
       arrows,
       texts,
       codeBlocks,// Add connections to the saved data
+      codeBlockMap,
     };
     const blob = new Blob([JSON.stringify(shapes)], {
       type: "application/json",
@@ -217,6 +247,9 @@ export const ShapesProvider = ({ children }: { children: React.ReactNode }) => {
         setArrows(shapesData.arrows || []);
         setTexts(shapesData.texts || []);
         setCodeBlocks(shapesData.codeBlocks || []);
+        Object.entries(shapesData.codeBlockMap).forEach(([name, uid]) => {
+          setCodeBlock(name, uid as string);
+        });
       }
     };
     input.click();

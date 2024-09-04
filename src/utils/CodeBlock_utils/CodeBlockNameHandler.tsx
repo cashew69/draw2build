@@ -26,7 +26,9 @@ export const useCodeBlockNameHandler = ({
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTempName(e.target.value);
+    const newName = e.target.value;
+    setTempName(newName);
+    updateCodeBlockName(index, newName);
   };
 
   return { handleRename, handleSaveName, handleNameChange };

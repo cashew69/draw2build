@@ -33,6 +33,7 @@ import { handleCodeBlockTransform, codeBlockTransformerConfig } from './utils/Co
 import ShapeConnections from './ShapesConnections';
 import { useState } from "react";
 import { useCodeBlockNameHandler } from './utils/CodeBlock_utils/CodeBlockNameHandler';
+import { useCodeBlockMap } from './Contexts/filename-uid'; // Add this import
 
 // Main Canvas component where the drawing happens
 function Canvas() {
@@ -42,6 +43,7 @@ function Canvas() {
   // Stage Context.
   const { stagePos, setStagePos, stageScale, setStageScale, stageDrag} = useStageContext();
   const { selectedShape, setSelectedShape, isEditingElement, selectedCodeBlock, codeBlockTransformerRef } = useSelectionContext();
+  const { setCodeBlock } = useCodeBlockMap(); // Add this line
 
   const stageRef = useRef<Konva.Stage>(null);
   const { handleKeyDown, handleKeyUp, handleElementSet, handleSelect, handleCodeBlockSelect } = useCanvasEventHandlers();
@@ -171,6 +173,8 @@ function Canvas() {
                 addCodeBlock={(codeBlock) => {
                   const newCodeBlock = { ...codeBlock, uid: ShortId()};
                   addCodeBlock(newCodeBlock);
+                  // Add this line to save the new CodeBlock in the context
+                  setCodeBlock(newCodeBlock.name, newCodeBlock.uid);
                 }}
             />
           )}
@@ -249,7 +253,11 @@ function Canvas() {
               currentName: codeBlock.name,
               setRenamingCodeBlock,
               setTempName,
-              updateCodeBlockName,
+              updateCodeBlockName: (index, newName) => {
+                updateCodeBlockName(index, newName);
+                // Add this line to update the CodeBlock name in the context
+                setCodeBlock(newName, codeBlock.uid);
+              },
             });
 
             return (
