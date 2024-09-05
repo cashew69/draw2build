@@ -1,6 +1,3 @@
-# draw2build
-Here’s a beautiful and engaging project description for your page:
-
 ---
 
 ## 🌟 Welcome to #Draw2Build!
