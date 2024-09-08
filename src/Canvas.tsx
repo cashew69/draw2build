@@ -34,7 +34,7 @@ import ShapeConnections from './ShapesConnections';
 import { useState } from "react";
 import { useCodeBlockNameHandler } from './utils/CodeBlock_utils/CodeBlockNameHandler';
 import { useCodeBlockMap } from './Contexts/filename-uid'; // Add this import
-
+import RunTool from './runTool';
 // Main Canvas component where the drawing happens
 function Canvas() {
   const { rectangles, lines, arrows, texts, codeBlocks, addRectangle, addLine, addArrow, addText, addCodeBlock, updateRectPosition, updateLinePosition, updateArrowPosition, updateTextPosition, updateCodeBlockPosition, updateCodeContent, updateCodeBlockDimensions, updateCodeBlockName} = useShapesContext();
@@ -107,6 +107,7 @@ function Canvas() {
 
   return (
     <div>
+      <RunTool codeBlocks={codeBlocks} />
       <Stage
         onWheel={createZoomHandler({ setStageScale, setStagePos })}
         scaleX={stageScale}
@@ -129,7 +130,7 @@ function Canvas() {
       >
         <Layer>
           {InfiniteCanvas({ stagePos })}
-
+          
           {tool === "selection" && <SelectionBox stageRef={stageRef} />}
           {tool === "rect" && (
             <RectTool
@@ -352,6 +353,7 @@ function Canvas() {
                       }}
                       editable={!stageDrag && renamingCodeBlock !== `codeBlock${i}`}
                     />
+                    
                   </div>
                 </Html>
               </Group>

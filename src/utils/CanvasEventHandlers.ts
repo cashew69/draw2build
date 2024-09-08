@@ -15,9 +15,9 @@ export function useCanvasEventHandlers() {
   const [prevTool, setPrevTool] = React.useState("");
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    console.log("Key pressed:", e.key);
+    console.log("Key pressed by Samved:", e.key);
     if (e.key === "Delete") {
-      console.log("Delete key pressed. Current selected shape:", selectedShape);
+      console.log("Delete key pressed by Samved.. Current selected shape:", selectedShape);
       if (selectedShape) {
         deleteShape(selectedShape);
 
