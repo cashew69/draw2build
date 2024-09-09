@@ -11,12 +11,12 @@ import {
 } from "react-konva";
 import SelectionBox from "./selectionbox"; // For selection tool
 import Konva from "konva";
-import RectTool from "./rectTool"; // For drawing rectangles
-import LineTool from "./lineTool"; // For drawing lines
-import ArrowTool from "./arrowTool"; // For drawing arrows
-import { SetElement } from "./setElement"; // For adding text
-import { TextBox } from "./TextBox";
-import CodeBlockTool from "./codeBlockTool";
+import RectTool from "./Tools/rectTool"; // For drawing rectangles
+import LineTool from "./Tools/lineTool"; // For drawing lines
+import ArrowTool from "./Tools/arrowTool"; // For drawing arrows
+import { SetElement } from "./Tools/setElement"; // For adding text
+import { TextBox } from "./Tools/TextBox";
+import CodeBlockTool from "./Tools/codeBlockTool";
 import { Html } from "react-konva-utils";
 import CodeMirror from '@uiw/react-codemirror';
 import { okaidia } from '@uiw/codemirror-theme-okaidia';
@@ -30,11 +30,12 @@ import { useStageContext } from './Contexts/StageContext';
 import { useSelectionContext } from './Contexts/SelectionContext';
 import { useCanvasEventHandlers } from "./utils/CanvasEventHandlers";
 import { handleCodeBlockTransform, codeBlockTransformerConfig } from './utils/CodeBlock_utils/CodeBlockTransformHandler';
-import ShapeConnections from './ShapesConnections';
+import ShapeConnections from './Tools/ShapesConnections';
 import { useState } from "react";
 import { useCodeBlockNameHandler } from './utils/CodeBlock_utils/CodeBlockNameHandler';
 import { useCodeBlockMap } from './Contexts/filename-uid'; // Add this import
-import RunTool from './runTool';
+import RunTool from './Tools/runTool';
+import ComposerRectTool from './Tools/ComposerRectTool';
 // Main Canvas component where the drawing happens
 function Canvas() {
   const { rectangles, lines, arrows, texts, codeBlocks, addRectangle, addLine, addArrow, addText, addCodeBlock, updateRectPosition, updateLinePosition, updateArrowPosition, updateTextPosition, updateCodeBlockPosition, updateCodeContent, updateCodeBlockDimensions, updateCodeBlockName} = useShapesContext();
@@ -104,10 +105,12 @@ function Canvas() {
         return okaidia;
     }
   };
-
+  console.log(tool);
   return (
     <div>
       <RunTool codeBlocks={codeBlocks} />
+      
+      
       <Stage
         onWheel={createZoomHandler({ setStageScale, setStagePos })}
         scaleX={stageScale}
@@ -130,7 +133,7 @@ function Canvas() {
       >
         <Layer>
           {InfiniteCanvas({ stagePos })}
-          
+          {tool === "composerRect" && <ComposerRectTool stageRef={stageRef}/>}
           {tool === "selection" && <SelectionBox stageRef={stageRef} />}
           {tool === "rect" && (
             <RectTool
@@ -365,6 +368,7 @@ function Canvas() {
           <Transformer ref={transformerRef} ignoreStroke={true} />
           <Transformer ref={codeBlockTransformerRef} {...codeBlockTransformerConfig} />
           <ShapeConnections />
+          
         </Layer>
       </Stage>
     </div>

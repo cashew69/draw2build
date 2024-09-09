@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Rect, Group, Text } from 'react-konva';
-import { CustomCodeBlock } from './types';
+import { CustomCodeBlock } from '../types';
 import Konva from 'konva';
 import CodeMirror from '@uiw/react-codemirror';
 import { loadLanguage } from '@uiw/codemirror-extensions-langs';

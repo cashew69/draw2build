@@ -16,6 +16,7 @@ function ToolPanel() {
       <button onClick={() => setTool("text")}>Text</button>
       <button onClick={saveShapes}>Save</button>
       <button onClick={loadShapes}>Load</button>
+      <button onClick={() => setTool("composerRect")}>Composer Rect</button>
     </div>
   );
 }

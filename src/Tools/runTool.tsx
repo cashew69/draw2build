@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { executeCode } from './utils/CodeBlock_utils/Call_execute';
+import { executeCode } from '../utils/CodeBlock_utils/Call_execute';
 
 interface CodeBlock {
   name: string;

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Arrow, Group} from 'react-konva';
-import { useShapesContext } from './Contexts/ShapesContext';
-import { CustomRect, CustomLine, CustomArrow, CustomText, CustomCodeBlock } from './types';
+import { useShapesContext } from '../Contexts/ShapesContext';
+import { CustomRect, CustomLine, CustomArrow, CustomText, CustomCodeBlock } from '../types';
 
 const ShapeConnections: React.FC = () => {
   const { rectangles, lines, arrows, texts, codeBlocks } = useShapesContext();

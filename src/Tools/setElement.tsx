@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Group } from "react-konva";
 import { Html } from "react-konva-utils";
-import { useShapesContext } from "./Contexts/ShapesContext";
-import { useSelectionContext } from "./Contexts/SelectionContext";
+import { useShapesContext } from "../Contexts/ShapesContext";
+import { useSelectionContext } from "../Contexts/SelectionContext";
 
 export function SetElement({ onElementSet }: { onElementSet: () => void }) {
   const [textValue, setTextValue] = useState("");

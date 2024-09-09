@@ -16,4 +16,22 @@ export const executeCode = async (filename: string, content: string) => {
   }
 };
 
-executeCode("main.py", "print(699999*9)");
+executeCode("main.py", `def find_min_max(arr):
+    if len(arr) == 0:
+        return {'min': None, 'max': None}
+
+    min_value = arr[0]
+    max_value = arr[0]
+
+    for num in arr[1:]:
+        if num < min_value:
+            min_value = num
+        if num > max_value:
+            max_value = num
+
+    return {'min': min_value, 'max': max_value}
+
+# Example usage
+numbers = [3, 5, 1, 8, -2, 7]
+result = find_min_max(numbers)
+print('Min:', result['min'], 'Max:', result['max'])`);

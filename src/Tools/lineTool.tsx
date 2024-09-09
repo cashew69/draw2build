@@ -1,7 +1,7 @@
 // LineTool.tsx
 import React, { useState, useEffect } from "react";
 import { Line } from "react-konva";
-import { CustomLine } from "./types";
+import { CustomLine } from "../types";
 import Konva from "konva";
 
 function LineTool({
